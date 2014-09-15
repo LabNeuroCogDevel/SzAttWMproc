@@ -21,7 +21,7 @@ scriptdir=$(cd $(dirname $0);pwd)
 
 # find subject
 s=$1
-[ ! -d "$s" ] && s=$scriptdir/$1
+[ ! -d "$s" ] && s=$scriptdir/subj/$1
 [ ! -d "$s" ] && echo "cannot find subj dir ($1 or $s)" && exit 1
 
 cd $s
@@ -44,7 +44,7 @@ mpragedir=$(ls -d tfl-multiecho-epinav-711-RMS_256x192*/|tail -n1)
 cd $mpragedir
 mpragedir=$(pwd)
 
-[ ! -r "$warp" -o ! -r "$bet" ] && echo "running mprage!" && preprocessMprage -d a -r MNI_2mm -p "MR*"
+[ ! -r "$warp" -o ! -r "$bet" ] && echo "running mprage!" && preprocessMprage -d archive -r MNI_2mm -p "MR*"
 wait # prob dont need this
 [ ! -r "$warp" -o ! -r "$bet" ] && echo "mprage preproc failed!" && exit 1
 cd -
@@ -60,7 +60,8 @@ cd $ppdir
 [ ! -r $runname.nii.gz ] && 3dcopy $run $runname.nii.gz
 
 # reset TR
-[[ $(3dinfo -tr $runname.nii.gz) -ne $TR ]] &&  3drefit -TR $TR $runname.nii.gz
+TRreported=$(3dinfo -tr $runname.nii.gz)
+[[ "$TRreported" != "$TR" ]] &&  3drefit -TR $TR $runname.nii.gz
 
 # actually preproc
 echo "preproc $s $runname ($ppdir)"

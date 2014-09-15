@@ -1,1 +1,18 @@
-rsync -avz --chmod u=rwx,g=rx,o=rx meson:/disk/mace2/scan_data/WPC-4951/2014.08.22-09.26.25/\*
+## Brendan
+# notMB
+rsync -avz --chmod u=rwx,g=rx,o=rx meson:/disk/mace2/scan_data/WPC-4951/2014.08.22-09.26.25/\* ./
+# behave
+rsync -rvhi foranw@reese:~/src/CircleSacTasks/private/btc_2014/ btc_08222014/1d/
+
+
+## Scot
+rsync -rvzhi  meson:/disk/mace2/scan_data/WPC-4951/2014.08.29-12.20.09/\* ./
+rsync -rvhi meson:/disk/mace2/scan_data/WPC-4951/multiband/WPC4951-08292014-sm_20140829/ sm-20140829/MB
+# # matlab on reese
+# write1DWM('../atMR/P5_Sz_ATT_WM/data/WorkingMemory/WorkingMemory_sm_20140829_fMRI_20140829.mat','sm_20140829/WM')
+# write1DAtt('../atMR/P5_Sz_ATT_WM/data/Attention/Attention_sm_20140829_fMRI_20140829.mat','sm_20140829/Att')
+rsync -rvhi foranw@reese:~/src/CircleSacTasks/private/sm_20140829/ sm-20140829/1d/
+
+
+
+rsync -rvzhi foranw@wallace:/data/Luna1/Raw/MRCTR/11327_20140911 ./subj/
