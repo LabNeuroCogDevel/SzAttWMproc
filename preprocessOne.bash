@@ -18,6 +18,7 @@ timing1d=/Volumes/Phillips/SzAttWM/sliceTimings.1D
 TR=1.0
 
 scriptdir=$(cd $(dirname $0);pwd)
+echo "[$(date +"%F %H:%M"):$(pwd)] $0 $@" >> $scriptdir/log.txt
 
 # find subject
 s=$1
@@ -29,9 +30,13 @@ sdir=$(pwd);
 s=$(dirname $sdir)
 
 # find run
-runname=$2
 [ -z "$2" ] && echo "need a second argument: what run?" && exit 1
-run=$(ls $sdir/MB/*$2*hdr|grep -v ref|tail -n1)
+runname=$2
+
+if [ -z "$3" ]; then savename=$3; else savename=$runname; fi
+[ -z "$savename" ] && echo "no savename (2nd or 3rd argument)" && exit 1
+
+run=$(ls $sdir/MB/*$runname*hdr|grep -v ref|tail -n1)
 [ ! -r "$run" ] && echo "cannot find run dir ($run)" && exit 1
 
 
@@ -52,20 +57,20 @@ cd -
 ## Start Preproc
 
 # set preproc save dir
-ppdir=$sdir/preproc/$runname
+ppdir=$sdir/preproc/$savename
 [ ! -d $ppdir ] && mkdir -p  $ppdir
 cd $ppdir
 
 # move from ANALYZE to niifty
-[ ! -r $runname.nii.gz ] && 3dcopy $run $runname.nii.gz
+[ ! -r $savename.nii.gz ] && 3dcopy $run $savename.nii.gz
 
 # reset TR
-TRreported=$(3dinfo -tr $runname.nii.gz)
-[[ "$TRreported" != "$TR" ]] &&  3drefit -TR $TR $runname.nii.gz
+TRreported=$(3dinfo -tr $savename.nii.gz)
+[[ "$TRreported" != "$TR" ]] &&  3drefit -TR $TR $savename.nii.gz
 
 # actually preproc
-echo "preproc $s $runname ($ppdir)"
-preprocessFunctional -4d $runname.nii.gz -tr $TR -mprage_bet $mpragedir/$bet -warpcoef $mpragedir/$warp -threshold 98_2 -hp_filter 100 -rescaling_method 10000_globalmedian -template_brain MNI_2.3mm -func_struc_dof bbr -warp_interpolation spline -constrain_to_template y -wavelet_despike -4d_slice_motion -custom_slice_times $timing1d -mc_movie -motion_censor fd=0.9,dvars=20
+echo "preproc $s $savename ($ppdir)"
+preprocessFunctional -4d $savename.nii.gz -tr $TR -mprage_bet $mpragedir/$bet -warpcoef $mpragedir/$warp -threshold 98_2 -hp_filter 100 -rescaling_method 10000_globalmedian -template_brain MNI_2.3mm -func_struc_dof bbr -warp_interpolation spline -constrain_to_template y -wavelet_despike -4d_slice_motion -custom_slice_times $timing1d -mc_movie -motion_censor fd=0.9,dvars=20
 
 # dont have fieldmap! 
 # -fm_phase /Volumes/Serena/MMClock/MR_Raw/10638_20140507/gre_field_mapping_new_96x90.15/MR* -fm_magnitude /Volumes/Serena/MMClock/MR_Raw/10638_20140507/gre_field_mapping_new_96x90.14/MR* -fm_cfg clock 
