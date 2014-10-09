@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+#useage: drive_afni_stat 64 0.05
+# $1: input brick
+# $2: p-value
+# $3: range
+# $4: numcol
+bn=$1
+p=$2
+[ -z "$bn" ] && echo "bricknum: " && read bn;
+[ -z "$p" ] && echo "p-vale: 0." && read p && p="0.$p"
+
+plugout_drive -quit -com "SET_SUBBRICKS -1 $bn $(echo $bn+1|bc)"
+plugout_drive -quit -com "SET_THRESHNEW A $p *p"
