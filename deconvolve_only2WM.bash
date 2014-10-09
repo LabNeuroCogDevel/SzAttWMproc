@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -xe
 
 #
 # Preprocess subject
@@ -17,6 +18,7 @@ scriptdir=$(cd $(dirname $0);pwd)
 
 # find subject
 s=$1
+[ -z "$s" ] && echo "need a subject directory as first argument!" && exit 1
 [ ! -d "$s" ] && s=$scriptdir/$1
 [ ! -d "$s" ] && echo "cannot find subj dir ($1 or $s)" && exit 1
 
@@ -41,9 +43,8 @@ ldmodel="BLOCK(3,1)"    # long  delay is 3s
 sdmodel="BLOCK(1,1)"    # short delay is 1s
 pmodel="BLOCK(1,1)"     # given 1s to respond in probe
 
-set -xe
 
-prefix=simpledContrasts_2runs
+prefix=${s}_WM_DefaultContrasts
 
 
 # make sure we only have 2 runs in each of the stims
@@ -56,10 +57,12 @@ for od in $oneddir/{fix,Response,cue_ld{1,4}_sd{1,2},delay_ld{1,4}_sd{1,2}_dly{0
 	head -n2 $od > 1d/$(basename $od)
 done
 
+pattern=working_memory_X[12]
+[ -n "$2" ] && pattern=$2
 
 3dDeconvolve  \
-        -input $sdir/preproc/workingmemory_[12]/nfswdktm_workingmemory_[12]_5.nii.gz \
-	-CENSORTR <( cat $sdir/preproc/workingmemory_[12]/motion_info/censor_union.1D) \
+        -input $sdir/preproc/$pattern/nfswdktm_working*_5.nii.gz \
+	-CENSORTR <( cat $sdir/preproc/$pattern/motion_info/censor_union.1D) \
 	\
 	-num_stimts 21 \
 	-stim_times 1  1d/cue_ld1_sd1.1D        "$model"   -stim_label 1    cAm_1l1s\
@@ -84,7 +87,7 @@ done
 	-stim_times 20 1d/probe_ld4_sd2_chg1.1D "$pmodel"  -stim_label 20   prb_4l2s1c\
 	-stim_times 21 1d/Response.1D           "$model"   -stim_label 21   rspbtn_.5blk\
 	\
-	-num_glt 18  \
+	-num_glt 23  \
 	-gltsym 'SYM:.25*cAm_1l1s +.25*cAm_1l2s +.25*cAm_4l1s +.25*cAm_4l2s'             -glt_label 1  cue_mem  \
 	\
 	-gltsym 'SYM:.125*dly_1l1s_s +.125*dly_1l2s_s +.125*dly_4l1s_s +.125*dly_4l2s_s 
@@ -116,7 +119,21 @@ done
 	\
 	-gltsym 'SYM:.125*prb_1l1s0c +.125*prb_1l2s0c +.125*prb_4l1s0c +.125*prb_4l2s0c 
                     +.125*prb_1l1s1c +.125*prb_1l2s1c +.125*prb_4l1s1c +.125*prb_4l2s0c
-	            -.25*cAm_1l1s    -.25*cAm_1l2s    -.25*cAm_4l1s    -.25*cAm_4l2s'    -glt_label 18  prbVcue_mem  \
+	            -.25*cAm_1l1s    -.25*cAm_1l2s    -.25*cAm_4l1s    -.25*cAm_4l2s'    -glt_label 18 prbVcue_mem  \
+	\
+	-gltsym 'SYM:.125*prb_4l1s0c +.125*prb_4l2s0c +.125*prb_4l1s1c +.125*prb_4l2s1c     
+	            -.125*prb_1l1s0c -.125*prb_1l2s0c -.125*prb_1l1s1c -.125*prb_1l2s1c' -glt_label 19 prb_load4M1  \
+        \
+	-gltsym 'SYM:.125*prb_1l1s0c +.125*prb_4l1s0c +.125*prb_1l1s1c +.125*prb_4l1s1c
+	            -.125*prb_1l2s0c -.125*prb_4l2s0c -.125*prb_1l2s1c -.125*prb_4l2s1c' -glt_label 20 prb_leftMright \
+	\
+	-gltsym 'SYM:.125*prb_1l1s1c +.125*prb_1l2s1c +.125*prb_4l1s1c +.125*prb_4l2s0c
+	            -.125*prb_1l1s0c -.125*prb_1l2s0c -.125*prb_4l1s0c -.125*prb_4l2s0c' -glt_label 21 prb_chgMsame \
+         \
+	-gltsym 'SYM:.125*dly_4l1s_s +.125*dly_4l2s_s +.125*dly_4l1s_l +.125*dly_4l2s_l
+	            -.125*dly_1l1s_s -.125*dly_1l2s_s -.125*dly_1l1s_l -.125*dly_1l2s_l' -glt_label 22 dly_load4M1 \
+	\
+	-gltsym 'SYM:.25*cAm_4l1s +.25*cAm_4l2s -.25*cAm_1l1s -.25*cAm_1l2s'             -glt_label 23 cAm_load4M1  \
 	-overwrite \
 	-fout -tout -x1D Xmat.x1D -fitts ${prefix}_fitts -bucket ${prefix}_stats
 	

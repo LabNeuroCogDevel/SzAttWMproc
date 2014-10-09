@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -xe
 
 #
 # Preprocess subject
@@ -17,6 +18,7 @@ scriptdir=$(cd $(dirname $0);pwd)
 
 # find subject
 s=$1
+[ -z "$s" ] && echo "need a subject directory as first argument!" && exit 1
 [ ! -d "$s" ] && s=$scriptdir/$1
 [ ! -d "$s" ] && echo "cannot find subj dir ($1 or $s)" && exit 1
 
@@ -35,7 +37,6 @@ contrasts=$sdir/contrasts/Att
 cd $contrasts
 model="BLOCK(.5,1)" # everything we model is .5s long
 bmodel="BLOCK(96,1)" # blocks are about 95 seconds long (91--100)
-set -xe
 
 prefix=simpledContrasts_2runs
 
@@ -57,7 +58,7 @@ done
 
 
 3dDeconvolve  \
-        -input $sdir/preproc/attention_[12]/nfswdktm_attention_[12]_5.nii.gz \
+        -input $sdir/preproc/attention_X[12]/nfswdktm_attention_X[12]_5.nii.gz \
 	-CENSORTR <( cat $sdir/preproc/attention_*/motion_info/censor_union.1D) \
 	\
 	-num_stimts 12 \

@@ -17,3 +17,5 @@ rsync -rvhi foranw@reese:~/src/CircleSacTasks/private/sm_20140829/ sm-20140829/1
 
 rsync -rvzhi foranw@wallace:/data/Luna1/Raw/MRCTR/11327_20140911 ./subj/
 rsync -rvzhi meson:/disk/mace2/scan_data/WPC-4951/multiband/WPC4951-09112014-11327_20140911/ ./subj/11327_20140911/MB/ 
+
+rsync -rvzhi kaiwhang@meson:/disk/mace2/scan_data/WPC-6537/multiband/WPC6537-20141002-11330_20141002/ ./subj/11330_20141002/MB/

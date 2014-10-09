@@ -21,53 +21,50 @@ function pidof {
 }
 afnipid=$(pidof afni)
 lastpid=$(cat .afnipid)
-#echo "test $afnipid=$lastpid"
+echo "test $afnipid=$lastpid"
 if [[ -z "$afnipid" || "$lastpid" -ne "$afnipid" ]]; then
    afni -YESplugouts -niml  -dset $t1 $wm $att &
    pidof afni > .afnipid
-   sleep 30
+   sleep 10
 else 
    echo "using afni@$(cat .afnipid)"
 fi
 
 ### actually get images
 # use plugout_driver: /opt/ni_tools/afni/README.driver
-plugout_drive -quit -com "SET_XHAIRS OFF"
-plugout_drive -quit -com "SET_ANATOMY $(basename $t1)";
-plugout_drive -quit -com "SET_PBAR_NUMBER 12"
-plugout_drive -quit -com "OPEN_WINDOW sagittalimage mont=3x2:6"
-plugout_drive -quit -com "SET_SPM_XYZ 51 -23 19"
+plugout_drive -quit -com "SET_XHAIRS OFF" \
+                    -com "SET_ANATOMY $(basename $t1)" \
+                    -com "SET_PBAR_NUMBER 12" \
+                    -com "OPEN_WINDOW sagittalimage mont=3x2:6" \
+                    -com "SET_SPM_XYZ 51 -23 19" 
+sleep 2
 
-function takeShot() {
- contrast="$1"
- brik="$2"
- savedir="$3"
- [ -z "$contrast" -o -z "$savedir" ] && echo "give better inputs ($@)" && return 
+function takeShot {
+ file=$1
+ contrast=$2
+ savedir=$3
+ [ -z "$savedir" -o -z "file" -o -z "$contrast" ] && echo "bad inputs ($@)" && return
+
  [ ! -d $savedir ] && mkdir -p $savedir
- sb=$(3dinfo -label2index ${contrast}_GLT#0_Coef  $brik)
- [ -z "$sb" ] && echo "ERROR: no brik like ${contrast}_GLT#0_Coef" && return
-
- echo "using $sb for $contrast"
- ./drive_afni_stat $sb 0.05
- plugout_drive -quit -com "SAVE_PNG sagittalimage $savedir/${contrast}_p05.png"
+ ./drive_afni_stat $file $contrast 0.05 
+ plugout_drive -quit -com "SLEEP 100" -com "SAVE_PNG sagittalimage $savedir/${contrast}_p05.png"
  sleep 1
 }
 
 ## WM
-plugout_drive -quit -com "SWITCH_FUNCTION $wmb"
-plugout_drive -quit -com "SET_FUNC_RANGE 60"
+plugout_drive -quit -com "SWITCH_FUNCTION $wmb" -com "SET_FUNC_RANGE 60"
+sleep 5
 # cue, dly, target, load4-1: cue, delay, target
-# cue
 for c in cue_mem dly prb cAm_load4M1 dly_load4M1 prb_load4M1; do
- takeShot $c $wm img/wm/$sid
+ takeShot $wm $c img/wm/$sid
 done
 
 
 ## Att
-plugout_drive -quit -com "SWITCH_FUNCTION $attb"
-plugout_drive -quit -com "SET_FUNC_RANGE 60"
+plugout_drive -quit -com "SWITCH_FUNCTION $attb" -com "SET_FUNC_RANGE 60"
+sleep 5;
 # cue attend target cueflex-pop attendflex-pop targetflex-pop 
 for c in cue att prb cue_flxVpop att_flxVpop prb_flxVpop; do
- takeShot $c $att img/att/$sid
+ takeShot $att $c img/att/$sid
 done
 

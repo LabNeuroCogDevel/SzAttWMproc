@@ -44,7 +44,7 @@ set -xe
 
 
 ## MPRAGE first
-mpragedir=$(ls -d tfl-multiecho-epinav-711-RMS_256x192*/|tail -n1)
+mpragedir=$(ls -d tfl-multiecho-*/|tail -n1)
 [ ! -d "$mpragedir" ] && echo "no $mpragedir" && exit 1 
 cd $mpragedir
 mpragedir=$(pwd)
