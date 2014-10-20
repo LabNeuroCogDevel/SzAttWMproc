@@ -14,7 +14,7 @@
 
 warp=mprage_warpcoef.nii.gz
 bet=mprage_bet.nii.gz
-timing1d=/Volumes/Phillips/SzAttWM/sliceTimings.1D
+timing1d=/Volumes/Phillips/P5/sliceTimings.1D
 TR=1.0
 
 scriptdir=$(cd $(dirname $0);pwd)
@@ -25,17 +25,21 @@ s=$1
 [ ! -d "$s" ] && s=$scriptdir/subj/$1
 [ ! -d "$s" ] && echo "cannot find subj dir ($1 or $s)" && exit 1
 
+#go into subject's directory
 cd $s
+#set the directory
 sdir=$(pwd);
 s=$(dirname $sdir)
 
-# find run
+# find run (i.e., attention_X1, attention_X2)
 [ -z "$2" ] && echo "need a second argument: what run?" && exit 1
 runname=$2
+
 
 if [ -z "$3" ]; then savename=$3; else savename=$runname; fi
 [ -z "$savename" ] && echo "no savename (2nd or 3rd argument)" && exit 1
 
+#looking for the run file inside /Volumes/Phillips/P5/subj/11327_20140911
 run=$(ls $sdir/MB/*$runname*hdr|grep -v ref|tail -n1)
 [ ! -r "$run" ] && echo "cannot find run dir ($run)" && exit 1
 
@@ -44,8 +48,12 @@ set -xe
 
 
 ## MPRAGE first
+#set mprage directory
+#command tail outputs the last part, or "tail", of files
 mpragedir=$(ls -d tfl-multiecho-*/|tail -n1)
+#if the above command is blank then come back with no mpragedir
 [ ! -d "$mpragedir" ] && echo "no $mpragedir" && exit 1 
+#go into mprage directory
 cd $mpragedir
 mpragedir=$(pwd)
 
