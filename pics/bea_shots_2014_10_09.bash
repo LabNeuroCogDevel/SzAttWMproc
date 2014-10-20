@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
 for sid in sm-20140829 11327_20140911; do
-	t1="../subj/$sid/contrasts/WM/template.nii"
+	# this guy is a 2mm space (others are 2.3)
+	# bea used the 2mm when looking at the brains
+	t1="../subj/11327_20140911/contrasts/WM/template.nii"
 	wm="../subj/$sid/contrasts/WM/${sid}_WM_DefaultContrasts_stats+tlrc.HEAD"
 	#../subj/11327_20140911/contrasts/Att/simpledContrasts_2runs_stats+tlrc.BRIK
 	att="../subj/$sid/contrasts/Att/simpledContrasts_2runs_stats+tlrc.HEAD" 
@@ -35,7 +37,10 @@ for sid in sm-20140829 11327_20140911; do
 
 	# want 
 	# *i=>sag: 53 *83/95 = 46
+	#   mabye can use  53
 	# *j=> cor: 99 - 18 and 40 (99- because was looking left=right) = 81,59 
+	# maybe can use 18 and 40
+	# 113 - c(18,40): 95 73
 	# *k=> ax:  31 58 57 59 61 62 44 
 
 	for p in 0.05 0.005; do
@@ -53,52 +58,52 @@ for sid in sm-20140829 11327_20140911; do
 			    -com "SET_THRESHNEW A $p *p" \
 			    -com "SET_FUNC_RANGE 60" \
 			    \
-			    -com "SET_IJK 46 0 0" \
+			    -com "SET_IJK 53 0 0" \
 			    -com "SLEEP 200" \
 			    -com "SAVE_PNG sagittalimage imgs/${sid}_p${p}_${c}_sag_visual.png" \
 			    \
-			    -com "SET_IJK 0 81 0" \
+			    -com "SET_IJK 0 95 0" \
 			    -com "SLEEP 100" \
 			    -com "SAVE_PNG coronalimage imgs/${sid}_p${p}_${c}_cor_BA9_10.png" \
 			    \
-			    -com "SET_IJK 0 59 0" \
+			    -com "SET_IJK 0 73 0" \
 			    -com "SLEEP 100" \
 			    -com "SAVE_PNG coronalimage imgs/${sid}_p${p}_${c}_cor_motivation.png" \
-			    \
-			    -com "SET_IJK 0 0 31" \
-			    -com "SLEEP 100" \
-			    -com "SAVE_PNG axialimage imgs/${sid}_p${p}_${c}_ax_midTempG.png" \
-			    \
-			    -com "SET_IJK 0 0 58" \
-			    -com "SLEEP 100" \
-			    -com "SAVE_PNG axialimage imgs/${sid}_p${p}_${c}_ax_bilat_pat.png" \
-			    \
-			    -com "SET_IJK 0 0 57" \
-			    -com "SLEEP 100" \
-			    -com "SAVE_PNG axialimage imgs/${sid}_p${p}_${c}_ax_bilat_cont.png" \
-			    \
-			    -com "SET_IJK 0 0 59" \
-			    -com "SLEEP 100" \
-			    -com "SAVE_PNG axialimage imgs/${sid}_p${p}_${c}_ax_FEF.png" \
-			    \
-			    -com "SET_IJK 0 0 61" \
-			    -com "SLEEP 100" \
-			    -com "SAVE_PNG axialimage imgs/${sid}_p${p}_${c}_ax_RLateralized.png" \
-			    \
-			    -com "SET_IJK 0 0 62" \
-			    -com "SLEEP 100" \
-			    -com "SAVE_PNG axialimage imgs/${sid}_p${p}_${c}_ax_bilat.png" \
-			    \
-			    -com "SET_IJK 0 0 44" \
-			    -com "SLEEP 100" \
-			    -com "SAVE_PNG axialimage imgs/${sid}_p${p}_${c}_ax_visual.png" \
+			    #\
+			    #-com "SET_IJK 0 0 31" \
+			    #-com "SLEEP 100" \
+			    #-com "SAVE_PNG axialimage imgs/${sid}_p${p}_${c}_ax_midTempG.png" \
+			    #\
+			    #-com "SET_IJK 0 0 58" \
+			    #-com "SLEEP 100" \
+			    #-com "SAVE_PNG axialimage imgs/${sid}_p${p}_${c}_ax_bilat_pat.png" \
+			    #\
+			    #-com "SET_IJK 0 0 57" \
+			    #-com "SLEEP 100" \
+			    #-com "SAVE_PNG axialimage imgs/${sid}_p${p}_${c}_ax_bilat_cont.png" \
+			    #\
+			    #-com "SET_IJK 0 0 59" \
+			    #-com "SLEEP 100" \
+			    #-com "SAVE_PNG axialimage imgs/${sid}_p${p}_${c}_ax_FEF.png" \
+			    #\
+			    #-com "SET_IJK 0 0 61" \
+			    #-com "SLEEP 100" \
+			    #-com "SAVE_PNG axialimage imgs/${sid}_p${p}_${c}_ax_RLateralized.png" \
+			    #\
+			    #-com "SET_IJK 0 0 62" \
+			    #-com "SLEEP 100" \
+			    #-com "SAVE_PNG axialimage imgs/${sid}_p${p}_${c}_ax_bilat.png" \
+			    #\
+			    #-com "SET_IJK 0 0 44" \
+			    #-com "SLEEP 100" \
+			    #-com "SAVE_PNG axialimage imgs/${sid}_p${p}_${c}_ax_visual.png" \
 			    
 
 		done
 		## ATT
-		for c in pop hab flx; do
-		    sb=$(3dinfo -label2index attend_${c}#0_Coef   $att)
-		   tsb=$(3dinfo -label2index attend_${c}#0_Tstat  $att)
+		for c in attend_pop attend_hab attend_flx att_GLT; do
+		    sb=$(3dinfo -label2index ${c}#0_Coef   $att)
+		   tsb=$(3dinfo -label2index ${c}#0_Tstat  $att)
 
 		   echo "$sb $tsb"
 		   [ -z "$sb" -o -z "$tsb" ] && echo no sb ot sb && continue
@@ -109,45 +114,45 @@ for sid in sm-20140829 11327_20140911; do
 			    -com "SET_THRESHNEW A $p *p" \
 			    -com "SET_FUNC_RANGE 60" \
 			    \
-			    -com "SET_IJK 46 0 0" \
+			    -com "SET_IJK 53 0 0" \
 			    -com "SLEEP 200" \
 			    -com "SAVE_PNG sagittalimage imgs/${sid}_p${p}_${c}_sag_visual.png" \
 			    \
-			    -com "SET_IJK 0 81 0" \
+			    -com "SET_IJK 0 95 0" \
 			    -com "SLEEP 100" \
 			    -com "SAVE_PNG coronalimage imgs/${sid}_p${p}_${c}_cor_BA9_10.png" \
 			    \
-			    -com "SET_IJK 0 59 0" \
+			    -com "SET_IJK 0 73 0" \
 			    -com "SLEEP 100" \
 			    -com "SAVE_PNG coronalimage imgs/${sid}_p${p}_${c}_cor_motivation.png" \
-			    \
-			    -com "SET_IJK 0 0 31" \
-			    -com "SLEEP 100" \
-			    -com "SAVE_PNG axialimage imgs/${sid}_p${p}_${c}_ax_midTempG.png" \
-			    \
-			    -com "SET_IJK 0 0 58" \
-			    -com "SLEEP 100" \
-			    -com "SAVE_PNG axialimage imgs/${sid}_p${p}_${c}_ax_bilat_pat.png" \
-			    \
-			    -com "SET_IJK 0 0 57" \
-			    -com "SLEEP 100" \
-			    -com "SAVE_PNG axialimage imgs/${sid}_p${p}_${c}_ax_bilat_cont.png" \
-			    \
-			    -com "SET_IJK 0 0 59" \
-			    -com "SLEEP 100" \
-			    -com "SAVE_PNG axialimage imgs/${sid}_p${p}_${c}_ax_FEF.png" \
-			    \
-			    -com "SET_IJK 0 0 61" \
-			    -com "SLEEP 100" \
-			    -com "SAVE_PNG axialimage imgs/${sid}_p${p}_${c}_ax_RLateralized.png" \
-			    \
-			    -com "SET_IJK 0 0 62" \
-			    -com "SLEEP 100" \
-			    -com "SAVE_PNG axialimage imgs/${sid}_p${p}_${c}_ax_bilat.png" \
-			    \
-			    -com "SET_IJK 0 0 44" \
-			    -com "SLEEP 100" \
-			    -com "SAVE_PNG axialimage imgs/${sid}_p${p}_${c}_ax_visual.png" \
+			    #\
+			    #-com "SET_IJK 0 0 31" \
+			    #-com "SLEEP 100" \
+			    #-com "SAVE_PNG axialimage imgs/${sid}_p${p}_${c}_ax_midTempG.png" \
+			    #\
+			    #-com "SET_IJK 0 0 58" \
+			    #-com "SLEEP 100" \
+			    #-com "SAVE_PNG axialimage imgs/${sid}_p${p}_${c}_ax_bilat_pat.png" \
+			    #\
+			    #-com "SET_IJK 0 0 57" \
+			    #-com "SLEEP 100" \
+			    #-com "SAVE_PNG axialimage imgs/${sid}_p${p}_${c}_ax_bilat_cont.png" \
+			    #\
+			    #-com "SET_IJK 0 0 59" \
+			    #-com "SLEEP 100" \
+			    #-com "SAVE_PNG axialimage imgs/${sid}_p${p}_${c}_ax_FEF.png" \
+			    #\
+			    #-com "SET_IJK 0 0 61" \
+			    #-com "SLEEP 100" \
+			    #-com "SAVE_PNG axialimage imgs/${sid}_p${p}_${c}_ax_RLateralized.png" \
+			    #\
+			    #-com "SET_IJK 0 0 62" \
+			    #-com "SLEEP 100" \
+			    #-com "SAVE_PNG axialimage imgs/${sid}_p${p}_${c}_ax_bilat.png" \
+			    #\
+			    #-com "SET_IJK 0 0 44" \
+			    #-com "SLEEP 100" \
+			    #-com "SAVE_PNG axialimage imgs/${sid}_p${p}_${c}_ax_visual.png" \
 
 		done # END ATT
 	done # END P

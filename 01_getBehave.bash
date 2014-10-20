@@ -41,11 +41,10 @@ cd $(dirname $0)
 luna=${ld%%_*}
 visit=${ld##*_}
 
-## Attention
-set -x
-echo "WM $bea_res/Data/Tasks/P5SzWM/$cohort/$luna/$visit/mat/ subj/$ld/1d/WM write1DWM
-Att "$bea_res/Data/Tasks/Attention/$cohort/$luna/$visit/mat/" "subj/$ld/1d/Att" write1DAtt" |\
- while read task getDir savDir onedfunc; do
+## creat 1D files, create behave csv file
+echo  "WM $bea_res/Data/Tasks/P5SzWM/$cohort/$luna/$visit/mat/    subj/$ld/1d/WM  write1DWM  WMBehav
+Att $bea_res/Data/Tasks/Attention/$cohort/$luna/$visit/mat/ subj/$ld/1d/Att write1DAtt attBehav" |\
+ while read task getDir savDir onedfunc behavfunc; do
    ## WM
    #task="WM"
    #getDir="$bea_res/Data/Tasks/SzWM/$cohort/$luna/$visit/mat/"
@@ -56,19 +55,11 @@ Att "$bea_res/Data/Tasks/Attention/$cohort/$luna/$visit/mat/" "subj/$ld/1d/Att" 
    [ ! -d $savDir ] && mkdir -p $savDir
    cp $getDir/*mat $savDir/
    mat="$(find $savDir -name '*mat'|sed 1q)"
-   # run matlab
-   matlab -nodesktop -r "try,$onedfunc('$mat','$savDir'),end; quit"
-done
-##ATT
-#attGetDir="$bea_res/Data/Tasks/Attention/$cohort/$luna/$visit/mat/"
-#attSavDir="subj/$ld/1d/Att"
-#[ ! -d $attGetDir ] && echo "no att task dir @ $attGetDir" && exit 1
-## copy attention mat to dir
-#[ ! -d $attSavDir ] && mkdir -p $attSavDir
-#cp $attGetDir/*mat $attSavDir/
-#mat="$(find $attSavDir -name '*mat'|sed 1q)"
-## run matlab
-#matlab -nodesktop -r "try,write1DAtt('$mat','$attSavDir'),end; quit"
 
+
+   # run matlab
+   matlab -nodesktop -r "try, $onedfunc('$mat','$savDir'), end; try,  writeBehavCSV( $behavfunc('$mat')     ), end; quit;"
+
+done
 
 
