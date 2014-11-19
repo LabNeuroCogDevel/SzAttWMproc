@@ -9,7 +9,8 @@
 #  - rsync
 
 # google doc location
-url=https://docs.google.com/spreadsheets/d/1tklWovQor7Nt3m0oWsiP2RPRwDauIS8QUtY4la2kHac
+#url=https://docs.google.com/spreadsheets/d/1tklWovQor7Nt3m0oWsiP2RPRwDauIS8QUtY4la2kHac
+googleSheet="SubjInfoGoogleSheet.txt"
 host=open@reese # edit ~/.ssh/config and ssh-copy-id for automation 
 remotepath='~/P5'
 flagfile=avalToMeg
@@ -33,11 +34,12 @@ fi
 [ -z "$file" ]  && echo "preprocessMprage broken? couldn't find mprage.nii.gz for $id after running" && exit 1
 
 
-MEGID=$(curl -s "$url/export?format=tsv"| awk "(\$4==\"$id\"){print \$2}")
-[ -z "$MEGID" ]  && echo "cannot find $id in sheet\n edit $url/edit" && exit 1
+#MEGID=$(curl -s "$url/export?format=tsv"| awk "(\$4==\"$id\"){print \$2}")
+MEGID=$(awk "(\$4==\"$id\"){print \$2}" "$googleSheet" )
+[ -z "$MEGID" ]  && echo "cannot find $id in sheet\n see $googleSheet (pulled from google in 00_fetchData.bash)" && exit 1
 
 uploadpath=$host:$remotepath/MEG${MEGID}_MR${id}_mprage.nii.gz
-rsync $file $uploadpath
+rsync -vhi $file $uploadpath
 
 # write a file to says we transfered this mprage
 # this will be useful for any automated scripts (they'll know to skip running this)

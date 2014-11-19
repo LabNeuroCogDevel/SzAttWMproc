@@ -3,8 +3,9 @@
 #
 # Preprocess subject
 # arguments:
-#  1) subject (full directory if not run from same dir)
+#  1) subject_visit or full directory
 #  2) run (e.g. attention1)
+#  3) savename (optional, defaults to run)
 # 
 # * expect there to be a subfolder called MB
 # * expect mprage to be tfl-multiecho-epinav-711-RMS_256x192.8/
@@ -36,7 +37,7 @@ s=$(dirname $sdir)
 runname=$2
 
 
-if [ -z "$3" ]; then savename=$3; else savename=$runname; fi
+if [ -n "$3" ]; then savename=$3; else savename=$runname; fi
 [ -z "$savename" ] && echo "no savename (2nd or 3rd argument)" && exit 1
 
 #looking for the run file inside /Volumes/Phillips/P5/subj/11327_20140911
@@ -62,6 +63,7 @@ wait # prob dont need this
 [ ! -r "$warp" -o ! -r "$bet" ] && echo "mprage preproc failed!" && exit 1
 cd -
 
+
 ## Start Preproc
 
 # set preproc save dir
@@ -69,12 +71,17 @@ ppdir=$sdir/preproc/$savename
 [ ! -d $ppdir ] && mkdir -p  $ppdir
 cd $ppdir
 
+# test we haven't done this before
+fc=$(find . -name 'nfswdktm_*.nii.gz'|wc -l)
+[[ "$fc" -ge "2" ]] && echo "already have nfswdktm_*, consider removing $(pwd)/nfswdktm_* before running $0 $@" && exit 1
+
 # move from ANALYZE to niifty
 [ ! -r $savename.nii.gz ] && 3dcopy $run $savename.nii.gz
 
 # reset TR
 TRreported=$(3dinfo -tr $savename.nii.gz)
 [[ "$TRreported" != "$TR" ]] &&  3drefit -TR $TR $savename.nii.gz
+
 
 # actually preproc
 echo "preproc $s $savename ($ppdir)"

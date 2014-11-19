@@ -2,10 +2,9 @@
 set -xe
 
 #
-# Preprocess subject
+# GLM for Attention
 # arguments:
 #  1) subject (full directory if not run from same dir)
-#  2) run (e.g. attention1)
 # 
 # * expect there to be a subfolder called MB
 # * expect mprage to be tfl-multiecho-epinav-711-RMS_256x192.8/
