@@ -56,8 +56,11 @@ for t in Popout Habitual Flexible; do
 done
 
 
+pattern=attention_[12]
+[ -n "$2" ] && pattern=$2
+
 3dDeconvolve  \
-        -input $sdir/preproc/attention_X[12]/nfswdktm_attention_X[12]_5.nii.gz \
+        -input $sdir/preproc/$pattern/nfswdktm_${pattern}_5.nii.gz \
 	-CENSORTR <( cat $sdir/preproc/attention_*/motion_info/censor_union.1D) \
 	\
 	-num_stimts 12 \
