@@ -27,7 +27,7 @@ ld=$(basename $ld) # so we can use subj/11327_20140911/ (tab complete for lazy)
 # TODO: instead of requiring, we can just search the two
 #need to have second argument "Clinical" for patient or "Basic" for control
 cohort=$2
-[[ -z "$cohort" || ! "$cohort" =~ Basic|Clinical  ]] && \
+[[ -z "$cohort" || ! "$cohort" =~ Control|Clinical  ]] && \
 	 echo "second argument should be either Basic or Clinical" && exit
 
 #this is mounting bea_res where 
