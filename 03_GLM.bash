@@ -23,21 +23,24 @@ for visitdir in subj/*; do
 
 		subj=$( basename $visitdir )
 		
-		# 1dfolder and contranst foler
-		shortprot="BADPROTO"
-		[[ "$proto" == "attention"     ]] && shortprot="Att"
-		[[ "$proto" == "workingmemory" ]] && shortprot="WM"
+		# shortprot: 1dfolder and contranst foler
+		# glmprefix: where would completed runs be
+		# cmd: what command do we use for preprocessing
+		if [[ "$proto" == "attention"     ]]; then 
+			shortprot="Att"
+			glmprefix="simpledContrasts_2runs_stats+tlrc.HEAD"
+			cmd="./deconvolve_only2Att.bash";
 
-		# where would completed runs be
-		#subj/11327_20140911/contrasts/*/*HEAD
-		glmprefix="BADPROTO"
-		[[ "$proto" == "attention"     ]] && glmprefix="simpledContrasts_2runs_stats+tlrc.HEAD"
-		[[ "$proto" == "workingmemory" ]] && glmprefix="${subj}_WM_DefaultContrasts_stats+tlrc.HEAD"
+		elif [[ "$proto" == "workingmemory" ]]; then
+		       	shortprot="WM"
+			glmprefix="${subj}_WM_DefaultContrasts_stats+tlrc.HEAD"
+			cmd="./deconvolve_only2WM.bash"
 
-		# what command do we use for preprocessing
-		cmd="echo \"BAD proto in code $0\" '"
-		[[ "$proto" == "workingmemory" ]] && cmd="./deconvolve_only2WM.bash"
-		[[ "$proto" == "attention"     ]] && cmd="./deconvolve_only2Att.bash"
+		else
+			shortprot="BADPROTO"
+			glmprefix="BADPROTO"
+			cmd="echo \"BAD proto in code $0\" '"
+		fi
 
 
 		### Checks
@@ -47,6 +50,10 @@ for visitdir in subj/*; do
 			echo "* SKIP: already have constrasts ($glmprefix) for $subj $proto" && \
 			continue
 
+		# skip if we're told to
+		[ -r $visitdir/contrasts/$shortprot/skipme ] && \
+			echo "* SKIP: told to skip $subj (skipme file)" && \
+			continue
 		#echo "* OKAY: did not find: $visitdir/contrasts/$shortprot/${glmprefix}"
 
 		# check that we have 1d files (behavioral data)
@@ -62,8 +69,6 @@ for visitdir in subj/*; do
 			echo "* ERROR: $visitdir/preproc/$pattern/n*${pattern}_5.nii.gz has too few files"
 			continue
 		fi
-
-
 
 
 		echo $cmd $subj $pattern

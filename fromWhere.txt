@@ -1,4 +1,4 @@
-## Brendan
+## Brenden
 # notMB
 rsync -avz --chmod u=rwx,g=rx,o=rx meson:/disk/mace2/scan_data/WPC-4951/2014.08.22-09.26.25/\* ./
 # behave

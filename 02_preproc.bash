@@ -24,7 +24,7 @@ while read MBimg; do
 
 	# get the file base, protocol, and number
 	fbase=$(echo $MBimg | perl -ne 'print $1 if /((attention|working_?memory)_X?\d+)/i') 
-	proto=$(echo $MBimg | perl -ne 'print $1 if /(attention|working_?memory)_X?(\d+)/i') 
+	proto=$(echo $MBimg | perl -ne 'print lc($1) if /(attention|working_?memory)_X?(\d+)/i') 
 	num=$(echo   $MBimg | perl -ne 'print $2 if /(attention|working_?memory)_X?(\d+)/i') 
 
 	# remove underscores (working_memory to workingmemory)
@@ -39,11 +39,13 @@ while read MBimg; do
 	# skip if we already have preproccesed directory
 	[ -r subj/$subj/preproc/$savedir/nfswdktm_${savedir}_5.nii.gz ] && continue
 
+	[ -r subj/$subj/preproc/$savedir/skipme ] && echo "skiping $subj $savedir" && continue
 	# if we have the directory but not the final file, something went wrong before
 	[ -d subj/$subj/preproc/$savedir ] && \
-	       	echo "* WARNING: $subj $savedir folder exists but not final preproc, trying to redo now!"
+	       	echo "* WARNING: $subj $savedir folder exists but not final preproc, trying to redo now!" && \
+		echo "           'touch subj/$subj/preproc/$savedir/skipme'  to skip"
 
 
-        echo ./preprocessOne.bash $subj $fbase $savedir
+        ./preprocessOne.bash $subj $fbase $savedir
 done
 
