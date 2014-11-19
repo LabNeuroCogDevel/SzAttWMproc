@@ -4,7 +4,7 @@
 #  -- if we find a subj_visit directory without a 1d directory
 #     run getBehave_single.bash
 
-#set -xe
+set -e
 
 # go to script directory
 cd $(dirname $0)
@@ -16,7 +16,7 @@ googleSheet="SubjInfoGoogleSheet.txt"
 for visitdir in subj/*/; do  
    [ -d $visitdir/1d ] && continue
    id=$(basename $visitdir)
-   cohort=$(awk "(\$4==\"$id\"){print \$9}" "$googleSheet"|sed 's/Control/Basic/' )
+   cohort=$(awk "(\$4==\"$id\"){print \$9}" "$googleSheet")
 
-   echo ./getBehave_single.bash $id $cohort;
+   ./getBehave_single.bash $id $cohort;
 done
