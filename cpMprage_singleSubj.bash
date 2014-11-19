@@ -8,9 +8,10 @@
 #  - write avalToMEG as audit in mprage dir
 #  - rsync
 
+scriptdir=$(cd $(dirname $0); pwd)
 # google doc location
 #url=https://docs.google.com/spreadsheets/d/1tklWovQor7Nt3m0oWsiP2RPRwDauIS8QUtY4la2kHac
-googleSheet="SubjInfoGoogleSheet.txt"
+googleSheet="$scriptdir/SubjInfoGoogleSheet.txt"
 host=open@reese # edit ~/.ssh/config and ssh-copy-id for automation 
 remotepath='~/P5'
 flagfile=avalToMeg
@@ -19,7 +20,6 @@ flagfile=avalToMeg
 id=$1
 [ -z "$id" ]  && echo "need id as first argument" && exit 1
 
-scriptdir=$(cd $(dirname $0); pwd)
 file="$(find $scriptdir/subj/$id/tfl-multiecho-epinav-* -name mprage.nii.gz|tail -n1)"
 if [ -z "$file" ]; then
   t1dir="$(find $scriptdir/subj/$id/ -name 'tfl-multiecho-epinav-*'|tail -n1)"
