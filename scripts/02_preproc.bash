@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
+
+# stop runnign script if any errors
 set -e
 
 # preprocess Multiband functionals
+#
+# run like `02_preproc.bash show` to see what it will do (and not do it)
 # 
 # * will silently skip if expected final output nfswdktm_${protocol}_5.nii.gz exists already
 # * will warn and retry if preproc dir exists but does not have final output
@@ -11,8 +15,11 @@ set -e
 #      -- could be race condition where file is being written twice
 #      so always cpMprage and then preprocess functionals
 
-# work from script directory
-cd $(dirname $0)
+# we need matlab for preprocessFunctional's wavelet despiking
+if ! which matlab; then echo "matlab needs to be in the path!" && exit 1; fi
+
+# work from main directory
+cd $(dirname $0)/..
 
 # find all multiband images for attention and workingmemory 
 #  preprocess all of those that need it
@@ -46,6 +53,12 @@ while read MBimg; do
 		echo "           'touch subj/$subj/preproc/$savedir/skipme'  to skip"
 
 
-        ./preprocessOne.bash $subj $fbase $savedir
+	# if we provided an argument to the script, just show what needs to be done
+	if [ -n "$1" ]; then
+		echo scripts/preprocessOne.bash $subj $fbase $savedir 
+		continue
+	fi
+
+        scripts/preprocessOne.bash $subj $fbase $savedir
 done
 

@@ -13,11 +13,12 @@ set -e
 #      4. write avalToMeg file
 #
 
-# go to script directory
-cd $(dirname $0)
+# go to main directory
+cd $(dirname $0)/..
 
-for t1dir in subj/*/tfl*; do  
-	[ ! -r $t1dir/avalToMeg ] && ./cpMprage_singleSubj.bash $(basename $(dirname $t1dir));
+for t1dir in subj/*/tfl*; do
+    #if the avalToMeg file does not exist run cpMprage_singleSubj.bash
+	[ ! -r $t1dir/avalToMeg ] && scripts/cpMprage_singleSubj.bash $(basename $(dirname $t1dir));
 done
 
 exit 0

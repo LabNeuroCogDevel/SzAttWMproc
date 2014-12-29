@@ -9,6 +9,7 @@
 #  - rsync
 
 scriptdir=$(cd $(dirname $0); pwd)
+subjsdir="$scriptdir/.."
 # google doc location
 #url=https://docs.google.com/spreadsheets/d/1tklWovQor7Nt3m0oWsiP2RPRwDauIS8QUtY4la2kHac
 googleSheet="$scriptdir/SubjInfoGoogleSheet.txt"
@@ -20,14 +21,14 @@ flagfile=avalToMeg
 id=$1
 [ -z "$id" ]  && echo "need id as first argument" && exit 1
 
-file="$(find $scriptdir/subj/$id/tfl-multiecho-epinav-* -name mprage.nii.gz|tail -n1)"
+file="$(find $subjsdir/$id/tfl-multiecho-epinav-* -name mprage.nii.gz|tail -n1)"
 if [ -z "$file" ]; then
-  t1dir="$(find $scriptdir/subj/$id/ -name 'tfl-multiecho-epinav-*'|tail -n1)"
+  t1dir="$(find $subjsdir/$id/ -name 'tfl-multiecho-epinav-*'|tail -n1)"
   [ -z "$t1dir" ] && echo "cannot find a t1 dir for $id" && exit 1
 
   cd $t1dir
   preprocessMprage -d archive -r MNI_2mm -p "MR*"
-  file="$(find $scriptdir/subj/$id/tfl-multiecho-epinav-* -name mprage.nii.gz|tail -n1)"
+  file="$(find $subjsdir/$id/tfl-multiecho-epinav-* -name mprage.nii.gz|tail -n1)"
 fi
 
 # check again for file, something went wrong with preprocessMPRAGE

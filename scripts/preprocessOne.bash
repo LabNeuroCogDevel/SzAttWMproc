@@ -85,7 +85,7 @@ TRreported=$(3dinfo -tr $savename.nii.gz)
 
 # actually preproc
 echo "preproc $s $savename ($ppdir)"
-preprocessFunctional -4d $savename.nii.gz -tr $TR -mprage_bet $mpragedir/$bet -warpcoef $mpragedir/$warp -threshold 98_2 -hp_filter 100 -rescaling_method 10000_globalmedian -template_brain MNI_2.3mm -func_struc_dof bbr -warp_interpolation spline -constrain_to_template y -wavelet_despike -4d_slice_motion -custom_slice_times $timing1d -mc_movie -motion_censor fd=0.9,dvars=20
+preprocessFunctional -4d $savename.nii.gz -tr $TR -mprage_bet $mpragedir/$bet -warpcoef $mpragedir/$warp -threshold 98_2 -hp_filter 100 -rescaling_method 10000_globalmedian -template_brain MNI_2.3mm -func_struc_dof bbr -warp_interpolation spline -constrain_to_template y -wavelet_despike -4d_slice_motion -custom_slice_times $timing1d -mc_movie -motion_censor fd=0.9,dvars=20 -startover
 
 # dont have fieldmap! 
 # -fm_phase /Volumes/Serena/MMClock/MR_Raw/10638_20140507/gre_field_mapping_new_96x90.15/MR* -fm_magnitude /Volumes/Serena/MMClock/MR_Raw/10638_20140507/gre_field_mapping_new_96x90.14/MR* -fm_cfg clock 

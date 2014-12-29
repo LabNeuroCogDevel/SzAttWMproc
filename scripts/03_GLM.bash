@@ -10,11 +10,16 @@
 #
 # N.B. if prefix names change in deconvole_only2*
 #      then change glmprefix here
+#
+#
+# run e.g. `03_GLM.bash show` to see what it will run without actually running
+
 
 
 set -e
 
-cd $(dirname $0);
+# go to main directory
+cd $(dirname $0)/..;
 
 for visitdir in subj/*; do
 	for proto in attention workingmemory; do 
@@ -29,12 +34,12 @@ for visitdir in subj/*; do
 		if [[ "$proto" == "attention"     ]]; then 
 			shortprot="Att"
 			glmprefix="simpledContrasts_2runs_stats+tlrc.HEAD"
-			cmd="./deconvolve_only2Att.bash";
+			cmd="scripts/deconvolve_only2Att.bash";
 
 		elif [[ "$proto" == "workingmemory" ]]; then
 		       	shortprot="WM"
 			glmprefix="${subj}_WM_DefaultContrasts_stats+tlrc.HEAD"
-			cmd="./deconvolve_only2WM.bash"
+			cmd="scripts/deconvolve_only2WM.bash"
 
 		else
 			shortprot="BADPROTO"
@@ -71,7 +76,13 @@ for visitdir in subj/*; do
 		fi
 
 
-		echo $cmd $subj $pattern
+		# if we gave any input, just show waht we would od
+		if [[ -n "$1" ]]; then
+		  echo "##  $cmd $subj $pattern"
+		# otherwise do it
+		else
+		  $cmd $subj $pattern
+		fi
 
 	done
 done

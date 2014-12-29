@@ -43,7 +43,7 @@ bea_res="/Users/lncd/rcn/bea_res"
 #the dollar sign before it gets you the VALUE of the variable
 cd $(dirname $0)
 
-# need to have a subject directory locally
+# need to have a subject directory locally (on Phillips)
 [ ! -r subj/$ld ] && echo "no subject dir $(pwd)/subj/$ld" && exit 1
 # and on B
 luna=${ld%%_*}

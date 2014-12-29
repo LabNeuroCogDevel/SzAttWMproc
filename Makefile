@@ -14,22 +14,22 @@
 all: glm
 
 glm: preproc behave
-	./03_GLM.bash
+	scripts/03_GLM.bash
 
 preproc: fetchData mprage
-	./02_preproc.bash
+	scripts/02_preproc.bash
 
 behave: fetchData
-	./01_getBehave.bash
+	scripts/01_getBehave.bash
 
 mprage: fetchData
-	./01_cpMprage.bash
+	scripts/01_cpMprage.bash
 
 fetchData:
-	./00_fetchData.bash
+	scripts/00_fetchData.bash
 	# writes SubjInfoGoogleSheet.txt by grabbing google sheet
 	# copies over new subjects from wallace
 
 
 dsi: fetchData
-	./01_cpDSI.bash
+	scripts/01_cpDSI.bash
