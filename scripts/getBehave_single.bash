@@ -69,7 +69,7 @@ Att $bea_res/Data/Tasks/Attention/$cohort/$luna/$visit/mat/ subj/$ld/1d/Att writ
 
    # run matlab
    #running these files: attBehav.m, WMBehav.m, writeBehaveCSV.m
-   matlab -nodesktop -r "try, $onedfunc('$mat','$savDir'), end; try,  writeBehavCSV( $behavfunc('$mat')     ), end; quit;"
+   matlab -nodisplay -r "try, $onedfunc('$mat','$savDir'), end; try,  writeBehavCSV( $behavfunc('$mat')     ), end; quit;"
 
 done
 
