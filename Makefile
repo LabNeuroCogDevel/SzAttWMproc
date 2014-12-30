@@ -1,9 +1,11 @@
 ## MAKEFILE
 # call like: 
-# 
-#   make label
+#   make mprage # to send parse and send mprage to ME/EG people
+#
+# where call is of the form 
+#   make "label"
 #   
-# where labels are defined below like:
+# labels are defined below like:
 #
 #   label: depends
 #        command
