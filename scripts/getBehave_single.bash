@@ -12,7 +12,8 @@
 #   svn export https://github.com/LabNeuroCogDevel/CircleSacTasks/trunk/WMBehav.m
 #   svn export https://github.com/LabNeuroCogDevel/CircleSacTasks/trunk/writeBehavCSV.m
 
-
+scriptdir=$(cd $(basename $0);pwd)
+subjdir=$(cd $scriptdir/../subj;pwd)
 # need luna_date to do anything
 #first argument is a luna date
 #a luna_date looks like this 11333_20141017
@@ -20,7 +21,7 @@ ld=$1
 [[ -z "$ld" ]] && echo "first argument should be a luna_date" && exit 1
 
 #set the luna_date as the basename for the subject directories
-ld=$(basename $ld) # so we can use subj/11327_20140911/ (tab complete for lazy)
+ld=$(basename $ld) # so we can use ../subj/11327_20140911/ (tab complete for lazy)
 [[ ! "$ld" =~ [0-9][0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]  ]] && \
 	 echo "first argument should be a luna_date" && exit
 
@@ -44,7 +45,7 @@ bea_res="/Users/lncd/rcn/bea_res"
 cd $(dirname $0)
 
 # need to have a subject directory locally (on Phillips)
-[ ! -r subj/$ld ] && echo "no subject dir $(pwd)/subj/$ld" && exit 1
+[ ! -r $subjdir/$ld ] && echo "no subject dir $subjdir/$ld" && exit 1
 # and on B
 luna=${ld%%_*}
 visit=${ld##*_}
@@ -52,8 +53,8 @@ visit=${ld##*_}
 ## creat 1D files, create behave csv file
 #1D files are the timing files that you are going to need later on
 #prints out the variables you'll need in the "while read section"
-echo  "WM $bea_res/Data/Tasks/P5SzWM/$cohort/$luna/$visit/mat/    subj/$ld/1d/WM  write1DWM  WMBehav
-Att $bea_res/Data/Tasks/Attention/$cohort/$luna/$visit/mat/ subj/$ld/1d/Att write1DAtt attBehav" |\
+echo  "WM $bea_res/Data/Tasks/P5SzWM/$cohort/$luna/$visit/mat/    $subjdir/$ld/1d/WM  write1DWM  WMBehav
+Att $bea_res/Data/Tasks/Attention/$cohort/$luna/$visit/mat/ $subjdir/$ld/1d/Att write1DAtt attBehav" |\
  while read task getDir savDir onedfunc behavfunc; do
    ## WM
    #task="WM"

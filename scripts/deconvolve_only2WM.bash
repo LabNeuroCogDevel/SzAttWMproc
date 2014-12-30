@@ -15,13 +15,20 @@ set -xe
 
 
 scriptdir=$(cd $(dirname $0);pwd)
+subjsdir=$scriptdir/../subj
 
 # find subject
 s=$1
 [ -z "$s" ] && echo "need a subject directory as first argument!" && exit 1
+# look in a bunch of places for the subject
 [ ! -d "$s" ] && s=$scriptdir/$1
+[ ! -d "$s" ] && s=$scriptdir/../$1
+[ ! -d "$s" ] && s=$subjsdir/$1
 [ ! -d "$s" ] && echo "cannot find subj dir ($1 or $s)" && exit 1
 
+# go into the directory we found
+# make sure we have abosulte path
+# and reset s to be the subject again
 cd $s
 sdir=$(pwd);
 s=$(basename $sdir)
@@ -31,6 +38,7 @@ oneddir=$sdir/1d/WM
 [ ! -d "$oneddir" ] && echo "cannot find 1d dir ($oneddir)" && exit 1
 echo $oneddir
 
+# setup directory for contrasts
 contrasts=$sdir/contrasts/WM
 [ ! -d "$contrasts" ] && mkdir -p $contrasts
 

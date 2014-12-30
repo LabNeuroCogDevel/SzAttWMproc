@@ -14,11 +14,14 @@ set -xe
 
 
 scriptdir=$(cd $(dirname $0);pwd)
+subjsdir=$scriptdir/../subj
 
 # find subject
 s=$1
 [ -z "$s" ] && echo "need a subject directory as first argument!" && exit 1
 [ ! -d "$s" ] && s=$scriptdir/$1
+[ ! -d "$s" ] && s=$scriptdir/../$1
+[ ! -d "$s" ] && s=$subjsdir/$1
 [ ! -d "$s" ] && echo "cannot find subj dir ($1 or $s)" && exit 1
 
 cd $s

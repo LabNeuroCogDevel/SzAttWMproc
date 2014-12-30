@@ -19,11 +19,12 @@ timing1d=/Volumes/Phillips/P5/sliceTimings.1D
 TR=1.0
 
 scriptdir=$(cd $(dirname $0);pwd)
+subjdir=$(cd $scriptdir/../subj;pwd)
 echo "[$(date +"%F %H:%M"):$(pwd)] $0 $@" >> $scriptdir/log.txt
 
 # find subject
 s=$1
-[ ! -d "$s" ] && s=$scriptdir/subj/$1
+[ ! -d "$s" ] && s=$subjdir/$1
 [ ! -d "$s" ] && echo "cannot find subj dir ($1 or $s)" && exit 1
 
 #go into subject's directory

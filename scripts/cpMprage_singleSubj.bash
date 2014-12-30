@@ -9,7 +9,7 @@
 #  - rsync
 
 scriptdir=$(cd $(dirname $0); pwd)
-subjsdir="$scriptdir/.."
+subjsdir=$(cd $scriptdir/../subj;pwd)
 # google doc location
 #url=https://docs.google.com/spreadsheets/d/1tklWovQor7Nt3m0oWsiP2RPRwDauIS8QUtY4la2kHac
 googleSheet="$scriptdir/SubjInfoGoogleSheet.txt"
