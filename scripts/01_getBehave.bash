@@ -10,6 +10,7 @@ set -e
 cd $(dirname $0)
 
 googleSheet="SubjInfoGoogleSheet.txt"
+[ ! -r $googleSheet ] && echo "cannot find/open $googleSheet!" && exit 1
 # look inside each subject directory
 #  try to find a 1d folder.
 #  if it's not there, run getBehave_single.bash to create it

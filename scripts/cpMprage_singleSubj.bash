@@ -13,6 +13,8 @@ subjsdir=$(cd $scriptdir/../subj;pwd)
 # google doc location
 #url=https://docs.google.com/spreadsheets/d/1tklWovQor7Nt3m0oWsiP2RPRwDauIS8QUtY4la2kHac
 googleSheet="$scriptdir/SubjInfoGoogleSheet.txt"
+[ ! -r $googleSheet ] && echo "cannot find/open $googleSheet!" && exit 1
+
 host=open@reese # edit ~/.ssh/config and ssh-copy-id for automation 
 remotepath='~/P5'
 flagfile=avalToMeg
@@ -36,7 +38,8 @@ fi
 
 
 #MEGID=$(curl -s "$url/export?format=tsv"| awk "(\$4==\"$id\"){print \$2}")
-MEGID=$(awk "(\$4==\"$id\"){print \$2}" "$googleSheet" )
+#MEGID=$(awk "(\$4==\"$id\"){print \$2}" "$googleSheet" ) # awk doesn't care about white spaces, can mess up column num
+MEGID=$(perl -F"\t" -slane "print \$F[1] if(\$F[3]==\"$id\")" "$googleSheet" )
 [ -z "$MEGID" ]  && echo "cannot find $id in sheet\n see $googleSheet (pulled from google in 00_fetchData.bash)" && exit 1
 
 uploadpath=$host:$remotepath/MEG${MEGID}_MR${id}_mprage.nii.gz

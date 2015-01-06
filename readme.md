@@ -48,3 +48,6 @@ peicewise processing using `11333_20141017`
 
 ```
 
+# Other files and folders
+ * `scripts/cron/` folder stores scripts run automatically/nightly by cron. see `crontab -l`
+ * `graphs/` and `presentations/` are relics from first exploration of paradigm
