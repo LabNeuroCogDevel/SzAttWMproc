@@ -12,7 +12,7 @@
 #   svn export https://github.com/LabNeuroCogDevel/CircleSacTasks/trunk/WMBehav.m
 #   svn export https://github.com/LabNeuroCogDevel/CircleSacTasks/trunk/writeBehavCSV.m
 
-scriptdir=$(cd $(basename $0);pwd)
+scriptdir=$(cd $(dirname $0);pwd)
 subjdir=$(cd $scriptdir/../subj;pwd)
 # need luna_date to do anything
 #first argument is a luna date

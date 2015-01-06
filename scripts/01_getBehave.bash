@@ -15,14 +15,15 @@ googleSheet="SubjInfoGoogleSheet.txt"
 #  try to find a 1d folder.
 #  if it's not there, run getBehave_single.bash to create it
 #  visitdir is your luna lab id + scan date
-for visitdir in subj/*/; do
+for visitdir in ../subj/*/; do
    #if a 1d file exists for each subject continue on
     [ -d $visitdir/1d ] && continue
    #set id 
     id=$(basename $visitdir)
     #go to field 4 of the google sheet and make sure that equals id
     #then print out the cohort (field 9)
-   cohort=$(awk "(\$4==\"$id\"){print \$9}" "$googleSheet")
+   #cohort=$(awk "(\$4==\"$id\"){print \$9}" "$googleSheet") # 20150106WF - awk skips fields if only whitespace
+   cohort=$(perl -F"\t" -slane "print \$F[8] if(\$F[3]==\"$id\")" "$googleSheet" )
 #use those variables to run that command
    ./getBehave_single.bash $id $cohort;
 done
