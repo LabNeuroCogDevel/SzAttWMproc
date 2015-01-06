@@ -38,7 +38,7 @@ fi
 
 
 #MEGID=$(curl -s "$url/export?format=tsv"| awk "(\$4==\"$id\"){print \$2}")
-#MEGID=$(awk "(\$4==\"$id\"){print \$2}" "$googleSheet" ) # awk doesn't care about white spaces, can mess up column num
+#MEGID=$(awk "(\$4==\"$id\"){print \$2}" "$googleSheet" ) # awk doesn't care about white spaces, can mess up column num, 20150106WF
 MEGID=$(perl -F"\t" -slane "print \$F[1] if(\$F[3]==\"$id\")" "$googleSheet" )
 [ -z "$MEGID" ]  && echo "cannot find $id in sheet\n see $googleSheet (pulled from google in 00_fetchData.bash)" && exit 1
 
