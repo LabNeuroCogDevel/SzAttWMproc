@@ -35,3 +35,9 @@ fetchData:
 
 dsi: fetchData
 	scripts/01_cpDSI.bash
+
+
+check: 
+	# check subjects match whats in the google doc 
+	# this should be put in cron too
+	scripts/99_checkSubjAndFiles.bash
