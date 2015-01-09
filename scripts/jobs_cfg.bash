@@ -13,7 +13,8 @@ function waitForJobs {
   njobs=$(jobs -p |wc -l)
   while [[ "$njobs" -ge "$MAXJOBS" ]]; do
     [ -n "$1" -a -r "$1" ] && source $1;
-    echo "sleeping for $SLEEPTIME, waiting for njobs ($njobs) to be < $MAXJOBS"
+    echo "$(date +%F-%H:%M) sleeping for $SLEEPTIME, waiting for njobs (${njobs// }) to be < $MAXJOBS"
+    jobs|sed 's/^/	/'
     sleep $SLEEPTIME
   done
 }

@@ -51,11 +51,12 @@ while read MBimg; do
 	# skip if we already have preproccesed directory
 	[ -r subj/$subj/preproc/$savedir/nfswdktm_${savedir}_5.nii.gz ] && continue
 
-	[ -r subj/$subj/preproc/$savedir/skipme ] && echo "skiping $subj $savedir" && continue
+	skipmefile="subj/$subj/preproc/$savedir/skipme"
+	[ -r "$skipmefile" ] && echo "skiping $subj $savedir ($skipmefile)" && continue
 	# if we have the directory but not the final file, something went wrong before
 	[ -d subj/$subj/preproc/$savedir ] && \
 	       	echo "* WARNING: $subj $savedir folder exists but not final preproc, trying to redo now!" && \
-		echo "           'touch subj/$subj/preproc/$savedir/skipme'  to skip"
+		echo "           'date > $skipmefile'  to skip"
 
 
 	# if we provided an argument to the script, just show what needs to be done
