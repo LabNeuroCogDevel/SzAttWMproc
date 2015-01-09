@@ -3,6 +3,11 @@
 # stop runnign script if any errors
 set -e
 
+CFGFILE="$(dirname $0)/jobs_cfg.bash"
+# pull in waitForJobs function
+#  function takes a config file as settings argument
+source $CFGFILE
+
 # preprocess Multiband functionals
 #
 # run like `02_preproc.bash show` to see what it will do (and not do it)
@@ -16,7 +21,7 @@ set -e
 #      so always cpMprage and then preprocess functionals
 
 # we need matlab for preprocessFunctional's wavelet despiking
-if ! which matlab; then echo "matlab needs to be in the path!" && exit 1; fi
+if ! which matlab >/dev/null; then echo "matlab needs to be in the path!" && exit 1; fi
 
 # work from main directory
 cd $(dirname $0)/..
@@ -59,6 +64,11 @@ while read MBimg; do
 		continue
 	fi
 
-        scripts/preprocessOne.bash $subj $fbase $savedir
+	echo "$subj $fbase -> $savedir"
+        scripts/preprocessOne.bash $subj $fbase $savedir &
+	# wait if we have too many jobs going
+	waitForJobs $CFGFILE
 done
 
+# wait for all the jobs to finish
+wait

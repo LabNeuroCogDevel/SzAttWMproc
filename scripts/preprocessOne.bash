@@ -15,7 +15,7 @@
 
 warp=mprage_warpcoef.nii.gz
 bet=mprage_bet.nii.gz
-timing1d=/Volumes/Phillips/P5/sliceTimings.1D
+timing1d=/Volumes/Phillips/P5/scripts/sliceTimings.1D
 TR=1.0
 
 scriptdir=$(cd $(dirname $0);pwd)
@@ -90,3 +90,6 @@ preprocessFunctional -4d $savename.nii.gz -tr $TR -mprage_bet $mpragedir/$bet -w
 
 # dont have fieldmap! 
 # -fm_phase /Volumes/Serena/MMClock/MR_Raw/10638_20140507/gre_field_mapping_new_96x90.15/MR* -fm_magnitude /Volumes/Serena/MMClock/MR_Raw/10638_20140507/gre_field_mapping_new_96x90.14/MR* -fm_cfg clock 
+
+# everything is okay!
+exit 0
