@@ -62,6 +62,7 @@ done
 pattern=attention_[12]
 [ -n "$2" ] && pattern=$2
 
+
 3dDeconvolve  \
         -input $sdir/preproc/$pattern/nfswdktm_${pattern}_5.nii.gz \
 	-CENSORTR <( cat $sdir/preproc/attention_*/motion_info/censor_union.1D) \

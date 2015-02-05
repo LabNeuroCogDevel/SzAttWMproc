@@ -2,7 +2,8 @@
 
 #
 # this script checks for missing things
-#  - subject in google doc and in subjs/
+#  - get subject list from google sheet
+#     - compare to whats in subjs/
 #     -- possible naming convention issue preventing copy from meson->wallace->skynet
 #  - sucessful behavioral processing
 #  - sucessful mprage processing
@@ -15,7 +16,9 @@ cd $scriptdir;
 
 
 # read in the google file
-sed 1d $scriptdir/SubjInfoGoogleSheet.txt | \
+#WF20150205: sed 1d $scriptdir/SubjInfoGoogleSheet.txt | \
+#         -- need to also not print lines that do not have MRID
+perl -F"\t" -slane 'next if !$F[2]||$.==1;print' $scriptdir/SubjInfoGoogleSheet.txt |
  while read \
    MEGDATE MEGID MRDATE MRID Task_Order_CB \
    WM_Response_CB Attention_Subtask_Order \
@@ -45,17 +48,22 @@ sed 1d $scriptdir/SubjInfoGoogleSheet.txt | \
 
        # data?
        regex=".*ep2d_MB_${task}.*_X?${tblock}_.*"
-       nMBfiles=$(echo $(find -E $subjdir/MB -type f -iregex "$regex" |wc -l))
+       nMBfiles=$(echo $(find -E $subjdir/MB -type f -iregex "$regex" 2>/dev/null|wc -l))
        [ -z "$nMBfiles" -o "$nMBfiles" -ne "4" ] &&
            echo "$MRID $task $tblock: bad MultiBand data (have $nMBfiles files)! ($subjdir/MB/$regex)" &&
            continue
 
        # preproc?
        tb_pp="$subjdir/preproc/${task}*_$tblock/nfswdktm_mean_func_5.nii.gz"
-       [ ! -r "$tb_pp" ] && 
+       [ ! -r $tb_pp ] && 
            echo "$MRID $task $tblock: not preprocessed! ($tb_pp)" && 
            continue
      done
    done
    
-done
+done  > missingData.log
+
+# check if missing stuff is new
+# if it is, print changes and update
+git diff --exit-code missingData.log ||
+       (git diff missingData.log; git add missingData.log && git commit -m 'record changes to missing data' )

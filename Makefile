@@ -1,6 +1,6 @@
 ## MAKEFILE
 # call like: 
-#   make mprage # to send parse and send mprage to ME/EG people
+#   make mprage # to proc mprage and send mprage to ME/EG people
 #
 # where call is of the form 
 #   make "label"
@@ -10,7 +10,7 @@
 #   label: depends
 #        command
 #
-# `make` by itself defaults to label 'all'
+# running `make` by itself defaults to label 'all'
 
 
 all: glm

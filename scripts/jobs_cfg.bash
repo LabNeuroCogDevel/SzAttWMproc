@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-MAXJOBS=3
+MAXJOBS=4
 SLEEPTIME=100
 
 # wait for SLEEPTIME between checking that MAXJOBS are not being run
@@ -7,14 +7,18 @@ SLEEPTIME=100
 #  first argument is settings file to be sourced
 function waitForJobs {
   # use first argument as settings file
+  jobscnfg="$1"
   # source if given
-  [ -n "$1" -a -r "$1" ] && source $1;
+  [ -n "$jobscnfg" -a -r "$jobscnfg" ] && source "$jobscnfg";
 
   njobs=$(jobs -p |wc -l)
+  i=1;
   while [[ "$njobs" -ge "$MAXJOBS" ]]; do
-    [ -n "$1" -a -r "$1" ] && source $1;
-    echo "$(date +%F-%H:%M) sleeping for $SLEEPTIME, waiting for njobs (${njobs// }) to be < $MAXJOBS"
-    jobs|sed 's/^/	/'
+    [ -n "$jobscnfg" -a -r "$jobscnfg" ] && source "$jobscnfg";
+    echo "$i $(date +%F-%H:%M) njobs >= MAXJOBS (${njobs// }>=$MAXJOBS); waiting ${SLEEPTIME}s "
+    #jobs|sed 's/^/	/'
     sleep $SLEEPTIME
+    let i++
+    njobs=$(jobs -p |wc -l)
   done
 }
