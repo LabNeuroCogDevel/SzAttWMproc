@@ -3,9 +3,11 @@ function vals=write1DAtt(mat,varargin)
  % look for 'correct' as optional input
  % - set sepcorrect if found
  % - remove from varargin (so other option can be directory)
- sepcorrect=cell2mat(cellfun(@(x) strmatch(x,'correct'), varargin,'UniformOutput',0));
+ sepcorrect=find(cell2mat(cellfun(@(x) ~isempty(strmatch(x,'correct')), varargin,'UniformOutput',0)));
  if length(varargin)>0 && ~isempty(sepcorrect)
-	 varargin = varargin( setdiff(1:length(varargin),sepcorrect) );
+	 % remove 'correct' from varargin
+	 keep=setdiff(1:length(varargin),sepcorrect);
+	 varargin = varargin( keep );
 	 sepcorrect=1;
  else
 	 sepcorrect=0;
@@ -139,7 +141,8 @@ function vals=write1DAtt(mat,varargin)
  % for each savename fieldvalue from vals
  for v = fieldnames(vals)'
      name=v{1};
-     fid=fopen( [oneDfolder '/' name '.1D'],'w'  );
+     onedout=[oneDfolder '/' name '.1D'];
+     fid=fopen( onedout,'w'  );
 
      for b=1:a.noBlocks
        bvals=vals.(name){b};

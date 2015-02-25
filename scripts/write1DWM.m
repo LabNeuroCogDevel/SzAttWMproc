@@ -8,7 +8,7 @@ function vals=write1DAtt(mat,varargin)
  % look for 'correct' as optional input
  % - set sepcorrect if found
  % - remove from varargin (so other option can be directory)
- sepcorrect=cell2mat(cellfun(@(x) strmatch(x,'correct'), varargin,'UniformOutput',0));
+ sepcorrect=find(cell2mat(cellfun(@(x) ~isempty(strmatch(x,'correct')), varargin,'UniformOutput',0)));
  if length(varargin)>0 && ~isempty(sepcorrect)
 	 varargin = varargin( setdiff(1:length(varargin),sepcorrect) );
 	 sepcorrect=1;
