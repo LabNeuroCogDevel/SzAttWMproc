@@ -1,9 +1,20 @@
 function vals=write1DAtt(mat,varargin)
 
+ 
 
  a=load(mat);
  
  
+ % look for 'correct' as optional input
+ % - set sepcorrect if found
+ % - remove from varargin (so other option can be directory)
+ sepcorrect=cell2mat(cellfun(@(x) strmatch(x,'correct'), varargin,'UniformOutput',0));
+ if length(varargin)>0 && ~isempty(sepcorrect)
+	 varargin = varargin( setdiff(1:length(varargin),sepcorrect) );
+	 sepcorrect=1;
+ else
+	 sepcorrect=0;
+ end
  
  
  
@@ -29,6 +40,15 @@ function vals=write1DAtt(mat,varargin)
   loadn    = [a.trial.load];
   side     = [a.trial.playCue];
   delayType= [a.events.longdelay];
+
+  % later we seperate by correct. but we dont want catch trials to lumped with no response
+  % so we'll call the correct value of catch trials something else (3)
+  %  new coding scheme 1      2       3        4
+  re_corrNames = {'Correct','Wrong','TooSlow','Catch'};
+  re_corr = repmat(4,1,length(correct)); % everything is a 4=catch trial
+  re_corr(correct==1) =1; % unless it's correct
+  re_corr(correct==0) =2; % or wrong
+  re_corr(correct==-1)=3; % or too slow (missed)
 
  
  % for each field name, we grab the onset of that time
@@ -73,6 +93,12 @@ function vals=write1DAtt(mat,varargin)
                     savename = [savename '_dly' num2str(delayType(t)) ];
                 end
             end
+
+	    % do we want to seperate correct
+	    if sepcorrect
+	      savename = [savename '_c' re_corrNames{re_corr(t)} ];
+            end
+
            % save name is the field name for this condition
            %savename=[ ...
            %           fieldNames{i} ...
