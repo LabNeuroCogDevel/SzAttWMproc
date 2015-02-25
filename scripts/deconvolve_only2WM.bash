@@ -65,7 +65,7 @@ for od in $oneddir/{fix,Response,cue_ld{1,3}_sd{1,2},delay_ld{1,3}_sd{1,2}_dly{0
 	head -n2 $od > 1d/$(basename $od)
 done
 
-pattern=working_memory_X[12]
+pattern=working*[12]
 [ -n "$2" ] && pattern=$2
 
 3dDeconvolve  \

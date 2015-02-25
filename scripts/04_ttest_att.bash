@@ -15,7 +15,7 @@ set -e
 trap '[ "$?" -ne 0 ] && echo "$0 ended with error!"' EXIT 
 
 # which conditions do we want to compare between controls and patients
-conditions="att_GLT"
+conditions="attend_pop attend_hab attend_flex att_GLT att_habVpop_GLT att_flexVpop_GLT att_flexVhab_GLT"
 
 # we are using the 2.3mm brain in our final fun->mni warp
 mask=$HOME/standard/mni_icbm152_nlin_asym_09c/mni_icbm152_t1_tal_nlin_asym_09c_mask_2.3mm.nii
@@ -39,13 +39,15 @@ pathAnaly="$maindir/group_analyses/Att"
 ### build cohorts
 
 # clear all cohort files
-cut -f9 -d "	" $subjtxt|sed 1d | sort | uniq | while read cohort; do echo -n "" > $pathAnaly/$cohort.1D; done
+# WF20150225 - google sheet updated, cohorts are in field 10 instead of 9
+cut -f10 -d "	" $subjtxt|sed 1d | sort | uniq | while read cohort; do echo -n "" > $pathAnaly/$cohort.1D; done
 
 # (re)build the cohort files
 #  - `sed` to remove header from the google doc
 #  - `cut` to get MRID (luna_date, column/field 4) and cohort (field 9) 
 #  - `echo >>` to write/append each contrast in the approprate cohort text file
-sed 1d "$subjtxt" | cut -f4,9 -d"	" | while read MRID cohort; do
+#MJ20150225 - google sheet updated $MRID in field 5 instead of 4
+sed 1d "$subjtxt" | cut -f5,10 -d"	" | while read MRID cohort; do
  contrastfile="$maindir/subj/$MRID/contrasts/Att/simpledContrasts_2runs_stats+tlrc.HEAD"
 
  [ ! -r "$contrastfile" ] && 
@@ -70,6 +72,9 @@ for cond in $conditions; do
   3dttest++ -overwrite -mask $mask \
             -setA $(cat $pathAnaly/Control.1D ) \
             -setB $(cat $pathAnaly/Clinical.1D) \
-            -prefix $ttestdir/${cond}_$(date +%F)
+            -prefix $ttestdir/$(date +%F)_${cond}
 done
+
+## put all tests into one giant file
+3dbucket -prefix $pathAnaly/ttest/$(date +%F)_Att $pathAnaly/ttest/*/$(date +%F)_*.BRIK
 
