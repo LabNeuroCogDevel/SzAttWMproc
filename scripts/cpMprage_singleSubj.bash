@@ -23,14 +23,25 @@ flagfile=avalToMeg
 id=$1
 [ -z "$id" ]  && echo "need id as first argument" && exit 1
 
-file="$(find $subjsdir/$id/tfl-multiecho-epinav-* -name mprage.nii.gz|tail -n1)"
+function findmprage{
+ find $subjsdir/$id/tfl-multiecho-epinav-* -name mprage.nii.gz|tail -n1
+}
+
+file="$(findmprage)"
+
 if [ -z "$file" ]; then
-  t1dir="$(find $subjsdir/$id/ -name 'tfl-multiecho-epinav-*'|tail -n1)"
+  t1dir="$(find $subjsdir/$id/ -type d -name 'tfl-multiecho-epinav-*'|tail -n1)"
   [ -z "$t1dir" ] && echo "cannot find a t1 dir for $id" && exit 1
 
   cd $t1dir
-  preprocessMprage -d archive -r MNI_2mm -p "MR*"
-  file="$(find $subjsdir/$id/tfl-multiecho-epinav-* -name mprage.nii.gz|tail -n1)"
+  preprocessMprage -d archive -r MNI_2mm -p "MR*" &
+  sleep 120 # enough time for Dimon to complete
+
+  # maybe we didn't way long enough
+  if [ -z "$(findmprage)" ]; then
+     wait 
+     file="$(findmprage)"
+  fi
 fi
 
 # check again for file, something went wrong with preprocessMPRAGE
@@ -39,7 +50,8 @@ fi
 
 #MEGID=$(curl -s "$url/export?format=tsv"| awk "(\$4==\"$id\"){print \$2}")
 #MEGID=$(awk "(\$4==\"$id\"){print \$2}" "$googleSheet" ) # awk doesn't care about white spaces, can mess up column num, 20150106WF
-MEGID=$(perl -F"\t" -slane "print \$F[1] if(\$F[3]==\"$id\")" "$googleSheet" )
+#MEGID=$(perl -F"\t" -slane "print \$F[1] if(\$F[3]==\"$id\")" "$googleSheet" ) # WF20150225 -- someone updated the sheet, id is now 5th column?
+MEGID=$(perl -F"\t" -slane "print \$F[1] if(\$F[4]==\"$id\")" "$googleSheet" )
 [ -z "$MEGID" ]  && echo "cannot find $id in sheet\n see $googleSheet (pulled from google in 00_fetchData.bash)" && exit 1
 
 uploadpath=$host:$remotepath/MEG${MEGID}_MR${id}_mprage.nii.gz
@@ -48,3 +60,6 @@ rsync -vhi $file $uploadpath
 # write a file to says we transfered this mprage
 # this will be useful for any automated scripts (they'll know to skip running this)
 echo  "$uploadpath $(date +%F)" > $(dirname $file)/$flagfile
+
+# wait for preprocessMprage to finish before trying anything else
+wait

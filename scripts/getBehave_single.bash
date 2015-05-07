@@ -25,11 +25,11 @@ ld=$(basename $ld) # so we can use ../subj/11327_20140911/ (tab complete for laz
 [[ ! "$ld" =~ [0-9][0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]  ]] && \
 	 echo "first argument should be a luna_date" && exit
 
-# TODO: instead of requiring, we can just search the two
-#need to have second argument "Clinical" for patient or "Control" for control
-cohort=$2
-[[ -z "$cohort" || ! "$cohort" =~ Control|Clinical  ]] && \
-	 echo "second argument should be either Control or Clinical" && exit
+# # TODO: instead of requiring, we can just search the two
+# #need to have second argument "Clinical" for patient or "Control" for control
+# cohort=$2
+# [[ -z "$cohort" || ! "$cohort" =~ Control|Clinical  ]] && \
+# 	 echo "second argument should be either Control or Clinical" && exit
 
 #this is mounting bea_res where 
 # need bea_res to get behave data
@@ -49,6 +49,10 @@ cd $(dirname $0)
 # and on B
 luna=${ld%%_*}
 visit=${ld##*_}
+
+! [[ $(ls -d $bea_res/Data/Tasks/{Attention,P5SzWM}/*/$luna/$visit/mat/ 2>/dev/null|sed 1q) =~ (Control|Clinical) ]] &&
+	echo "cannot find mat dir (ls $bea_res/Data/Tasks/{Attention,P5SzWM}/*/$luna/$visit/mat/)" && exit 1
+cohort="$BASH_REMATCH"
 
 ## creat 1D files, create behave csv file
 #1D files are the timing files that you are going to need later on
@@ -70,7 +74,7 @@ Att $bea_res/Data/Tasks/Attention/$cohort/$luna/$visit/mat/ $subjdir/$ld/1d/Att 
 
    # run matlab
    #running these files: attBehav.m, WMBehav.m, writeBehaveCSV.m
-   matlab -nodisplay -r "try, $onedfunc('$mat','$savDir'), end;try, $onedfunc('$mat','$savDir','correct'), end; try,  writeBehavCSV( $behavfunc('$mat')     ), end; quit;"
+   matlab -nodisplay -r "try, $onedfunc('$mat','$savDir'), end;try, $onedfunc('$mat','$savDir/bycorrect','correct'), end; try,  writeBehavCSV( $behavfunc('$mat')     ), end; quit;"
 
 done
 

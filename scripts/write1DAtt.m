@@ -4,6 +4,7 @@ function vals=write1DAtt(mat,varargin)
  % - set sepcorrect if found
  % - remove from varargin (so other option can be directory)
  sepcorrect=find(cell2mat(cellfun(@(x) ~isempty(strmatch(x,'correct')), varargin,'UniformOutput',0)));
+ mergecormis=find(cell2mat(cellfun(@(x) ~isempty(strmatch(x,'ctch=crct;slw=wrg')), varargin,'UniformOutput',0)));
  if length(varargin)>0 && ~isempty(sepcorrect)
 	 % remove 'correct' from varargin
 	 keep=setdiff(1:length(varargin),sepcorrect);
@@ -56,7 +57,13 @@ function vals=write1DAtt(mat,varargin)
   re_corr = repmat(4,1,length(correct)); % everything is a 4=catch trial
   re_corr(correct==1) =1; % unless it's correct
   re_corr(correct==0) =2; % or wrong
-  re_corr(correct==-1)=3; % or too slow (missed)
+  %re_corr(correct==-1)=3; % or too slow (missed)
+
+  % combine types for easier 3dDeconvolve WFMJ 20150429
+  if mergecormis
+    re_corr(correct==-1)=2; % or too slow (missed) -- record with wrong
+    re_corr(re_corr==4) =1; % pull catch into correct
+  end
 
 
  

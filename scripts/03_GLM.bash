@@ -33,13 +33,13 @@ for visitdir in subj/*; do
 		# cmd: what command do we use for preprocessing
 		if [[ "$proto" == "attention"     ]]; then 
 			shortprot="Att"
-			glmprefix="simpledContrasts_2runs_stats+tlrc.HEAD"
+			glmprefix="simpledContrasts_2runs_stats2+tlrc.HEAD"
 			cmd="scripts/deconvolve_only2Att.bash";
 
-		elif [[ "$proto" == "workingmemory" ]]; then
-		       	shortprot="WM"
-			glmprefix="${subj}_WM_DefaultContrasts_stats+tlrc.HEAD"
-			cmd="scripts/deconvolve_only2WM.bash"
+		#elif [[ "$proto" == "workingmemory" ]]; then
+		      # 	shortprot="WM"
+		#	glmprefix="${subj}_WM_DefaultContrasts_stats+tlrc.HEAD"
+		#	cmd="scripts/deconvolve_only2WM.bash"
 
 		else
 			shortprot="BADPROTO"
