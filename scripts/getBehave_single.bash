@@ -74,6 +74,8 @@ Att $bea_res/Data/Tasks/Attention/$cohort/$luna/$visit/mat/ $subjdir/$ld/1d/Att 
 
    # run matlab
    #running these files: attBehav.m, WMBehav.m, writeBehaveCSV.m
+   #2015-05-05WF -- merge correct+catch, wrong+tooslow for attetion done by redo_attetion1D.bash
+   #mlcmd="try, write1DAtt('$mat','$savDir/bycorrect_mrg','correct','ctch=crct;slw=wrg'),end;quit;"
    matlab -nodisplay -r "try, $onedfunc('$mat','$savDir'), end;try, $onedfunc('$mat','$savDir/bycorrect','correct'), end; try,  writeBehavCSV( $behavfunc('$mat')     ), end; quit;"
 
 done

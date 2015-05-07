@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+
+# generated cputime.txt # $0 | tee cputime.txt
+# use log file to get how long each step takes
+# BUG: doesn't do well if process went across 2 days
+
 set -e
 function exiterr {
   echo "$@"
