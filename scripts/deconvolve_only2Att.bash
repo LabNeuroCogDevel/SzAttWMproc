@@ -52,6 +52,11 @@ for od in $oneddir/{cue,attend,probe}_t{Habitual,Flexible,Popout}_c{Wrong,Correc
        head -n2 $od > 1d/$(basename $od)
 done
 
+cd $oneddir
+#20150508 make a total incorrect file (Michael's suggestion)
+#for some weird reason 1dcat changes the * to zeroes, and we don't want that in there
+1dcat cue_tPopout_cWrong.1D attend_tPopout_cWrong.1D probe_tPopout_cWrong.1D cue_tHabitual_cWrong.1D attend_tHabitual_cWrong.1D probe_tHabitual_cWrong.1D | sed 's/^ 0/*/; s/ 0//g' > total_Incorrect.1D
+
 #MJ 20150429 took out don't need right now
 #also get a block regressor
 #for t in Popout Habitual Flexible; do
@@ -61,6 +66,11 @@ done
   #perl -slane '$end=$F[$#F] + 1.5; print sprintf("\t%.3f to %.3f dur (%.3f)", $F[0], $end, $end-$F[0])' <(paste 1d/cue_t${t}.1D 1d/probe_t${t}.1D)
 #done
 
+cd $contrasts
+
+
+
+
 
 pattern=attention_[12]
 [ -n "$2" ] && pattern=$2
@@ -68,32 +78,43 @@ pattern=attention_[12]
 
 
 3dDeconvolve  \
-    -input $sdir/preproc/$pattern/nfswdktm_${pattern}_5.nii.gz \
+        -input $sdir/preproc/$pattern/nfswdktm_${pattern}_5.nii.gz \
 	-CENSORTR <( cat $sdir/preproc/attention_*/motion_info/censor_union.1D) \
 	\
-	-num_stimts 9 \
-	-stim_times 1 1d/attend_tPopout_cCorrect.1D   "$model"  -stim_label 1 att_pop_cor \
-	-stim_times 2 1d/attend_tHabitual_cCorrect.1D "$model"  -stim_label 2 att_hab_cor \
-	-stim_times 3 1d/attend_tFlexible_cCorrect.1D "$model"  -stim_label 3 att_flx_cor \
-	-stim_times 4 1d/cue_tPopout_cCorrect.1D   "$model"  -stim_label 4 cue_pop_cor \
-	-stim_times 5 1d/cue_tHabitual_cCorrect.1D "$model"  -stim_label 5 cue_hab_cor \
-	-stim_times 6 1d/cue_tFlexible_cCorrect.1D "$model"  -stim_label 6 cue_flx_cor \
-	-stim_times 7 1d/probe_tPopout_cCorrect.1D   "$model"  -stim_label 7 prb_pop_cor \
-	-stim_times 8 1d/probe_tHabitual_cCorrect.1D   "$model"  -stim_label 8 prb_hab_cor \
-	-stim_times 9 1d/probe_tFlexible_cCorrect.1D   "$model"  -stim_label 9 prb_flx_cor \
-	-num_glt 9 \
-	-gltsym 'SYM:.5*att_hab_cor -.5*att_pop_cor'                    -glt_label 1 att_habVpop \
-	-gltsym 'SYM:.5*att_flx_cor -.5*att_pop_cor'                    -glt_label 2 att_flxVpop \
-	-gltsym 'SYM:.5*att_flx_cor -.5*att_hab_cor'                    -glt_label 3 att_flxVhab \
-	-gltsym 'SYM:.5*cue_hab_cor -.5*cue_pop_cor'                    -glt_label 4 cue_habVpop \
-	-gltsym 'SYM:.5*cue_flx_cor -.5*cue_pop_cor'                    -glt_label 5 cue_flxVpop \
-	-gltsym 'SYM:.5*cue_flx_cor -.5*cue_hab_cor'                    -glt_label 6 cue_flxVhab \
-	-gltsym 'SYM:.5*prb_hab_cor -.5*prb_pop_cor'                    -glt_label 7 prb_habVpop \
-	-gltsym 'SYM:.5*prb_flx_cor -.5*prb_pop_cor'                    -glt_label 8 prb_flxVpop \
-	-gltsym 'SYM:.5*prb_flx_cor -.5*prb_hab_cor'                    -glt_label 9 prb_flxVhab \
+	-allzero_OK \
+	-GOFORIT 4 \
+	-num_stimts 10 \
+	-stim_times 1 $oneddir/cue_tPopout_cCorrect.1D   "$model"  -stim_label 1 cue_pop_cor \
+	-stim_times 2 $oneddir/attend_tPopout_cCorrect.1D "$model"  -stim_label 2 att_pop_cor \
+	-stim_times 3 $oneddir/probe_tPopout_cCorrect.1D "$model"  -stim_label 3 prb_pop_cor \
+	-stim_times 4 $oneddir/cue_tHabitual_cCorrect.1D   "$model"  -stim_label 4 cue_hab_cor \
+	-stim_times 5 $oneddir/attend_tHabitual_cCorrect.1D "$model"  -stim_label 5 att_hab_cor \
+	-stim_times 6 $oneddir/probe_tHabitual_cCorrect.1D "$model"  -stim_label 6 prb_hab_cor \
+	-stim_times 7 $oneddir/cue_tFlexible_cCorrect.1D   "$model"  -stim_label 7 cue_flx_cor \
+	-stim_times 8 $oneddir/attend_tFlexible_cCorrect.1D   "$model"  -stim_label 8 att_flx_cor \
+	-stim_times 9 $oneddir/probe_tFlexible_cCorrect.1D   "$model"  -stim_label 9 prb_flx_cor \
+	-stim_times 10 $oneddir/total_Incorrect.1D "$model"  -stim_label 10 total_incorrect \
+	-num_glt 12 \
+	-gltsym 'SYM:.333*cue_pop_cor +.333*cue_hab_cor +.333*cue_flx_cor' -glt_label 1 cue \
+	-gltsym 'SYM:.333*att_pop_cor +.333*att_hab_cor +.333*att_flx_cor' -glt_label 2 att \
+	-gltsym 'SYM:.333*prb_pop_cor +.333*prb_hab_cor +.333*prb_flx_cor' -glt_label 3 prb \
+	-gltsym 'SYM:.5*att_hab_cor -.5*att_pop_cor'                    -glt_label 4 att_habVpop \
+	-gltsym 'SYM:.5*att_flx_cor -.5*att_pop_cor'                    -glt_label 5 att_flxVpop \
+	-gltsym 'SYM:.5*att_flx_cor -.5*att_hab_cor'                    -glt_label 6 att_flxVhab \
+	-gltsym 'SYM:.5*cue_hab_cor -.5*cue_pop_cor'                    -glt_label 7 cue_habVpop \
+	-gltsym 'SYM:.5*cue_flx_cor -.5*cue_pop_cor'                    -glt_label 8 cue_flxVpop \
+	-gltsym 'SYM:.5*cue_flx_cor -.5*cue_hab_cor'                    -glt_label 9 cue_flxVhab \
+	-gltsym 'SYM:.5*prb_hab_cor -.5*prb_pop_cor'                    -glt_label 10 prb_habVpop \
+	-gltsym 'SYM:.5*prb_flx_cor -.5*prb_pop_cor'                    -glt_label 11 prb_flxVpop \
+	-gltsym 'SYM:.5*prb_flx_cor -.5*prb_hab_cor'                    -glt_label 12 prb_flxVhab \
 	-overwrite \
-	-fout -tout -x1D Xmat.x1D -fitts ${prefix}_fitts -bucket ${prefix}_stats2
+	-xjpeg design_matrix.png \
+	-fout -tout -x1D Xmat.x1D -fitts ${prefix}_fitts -bucket ${prefix}_stats
 	
 # we want to have a template too
 [ -r template.nii ] || ln -s $(readlink $sdir/tfl-multiecho-*/template_brain.nii) template.nii
 
+#REMLfit cmd, getting rid of temporal autocorrelation, may want to use
+3dREMLfit -matrix Decon.xmat.1D \
+ -input  -input $sdir/preproc/$pattern/nfswdktm_${pattern}_5.nii.gz \
+ -Rbuck Decon_REML -Rvar Decon_REMLvar -verb $*

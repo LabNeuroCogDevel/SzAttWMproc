@@ -1,9 +1,16 @@
 #!/usr/bin/env bash
 
 # copy of getBehave_single.bash
-# simlified to just redo attention where we merge:
-# - correct and catch
-# - missed and wrong
+#
+# simlified to just redo attention where we 
+# 1) "bycorrect_mrg/"
+#   merge:
+#   - correct and catch
+#   - missed and wrong
+# 2)"correct_trialOnly/"
+#   pull out correct trials
+#   - cue of every full correct trial into 1d for pop,hab,flex
+#
 # for ld in ../subj/*_*; do ./redo_attetion1D.bash $(basename $ld); done
 
 set -e
@@ -46,6 +53,10 @@ mat="$(find $savDir -name '*mat'|sed 1q)"
 # run matlab
 #running these files: attBehav.m, WMBehav.m, writeBehaveCSV.m
 mlcmd="try, write1DAtt('$mat','$savDir/bycorrect_mrg','correct','ctch=crct;slw=wrg'),end;quit;"
+matlab -nodisplay -r "$mlcmd"
+
+# 20150508 -- trial only
+mlcmd="try, write1DAtt('$mat','$savDir/correct_trialOnly','trialonly'),end;quit;"
 #echo "$mlcmd"
 matlab -nodisplay -r "$mlcmd"
 

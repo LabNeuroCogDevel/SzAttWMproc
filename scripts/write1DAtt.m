@@ -1,21 +1,44 @@
+% write1Dattt
+% options: 
+%  correct 
+%      sep correct and incorrect (by _c{'Correct','Wrong','TooSlow','Catch'})
+%  trialonly
+%     only grab from cue times (trial onset) for correct (not wrong,slow, or catch)
+%  ctch=crct;slw=wrng 
+%     merge catch and correct, merge wrong and too slow
+% ---
+% trialonly forces correct and will be useless if run with ctch=crct (b/c how long trial is will be a mystery)
+
+
 function vals=write1DAtt(mat,varargin)
 
  % look for 'correct' as optional input
  % - set sepcorrect if found
  % - remove from varargin (so other option can be directory)
- sepcorrect=find(cell2mat(cellfun(@(x) ~isempty(strmatch(x,'correct')), varargin,'UniformOutput',0)));
- mergecormis=find(cell2mat(cellfun(@(x) ~isempty(strmatch(x,'ctch=crct;slw=wrg')), varargin,'UniformOutput',0)));
- if length(varargin)>0 && ~isempty(sepcorrect)
-	 % remove 'correct' from varargin
-	 keep=setdiff(1:length(varargin),sepcorrect);
-	 varargin = varargin( keep );
-	 sepcorrect=1;
- else
-	 sepcorrect=0;
+ opts.sepcorrect=find(cell2mat(cellfun(@(x) ~isempty(strmatch(x,'correct')), varargin,'UniformOutput',0)));
+ opts.trialonly=find(cell2mat(cellfun(@(x) ~isempty(strmatch(x,'trialonly')), varargin,'UniformOutput',0)));
+ opts.mergecormis=find(cell2mat(cellfun(@(x) ~isempty(strmatch(x,'ctch=crct;slw=wrg')), varargin,'UniformOutput',0)));
+
+ % remove opts from varargin
+ % bool their existence (make them T/F flags)
+ for o=fieldnames(opts)'
+   o=o{1};
+   if isempty(opts.(o))
+     opts.(o)=0;
+   else 
+     keep=setdiff(1:length(varargin),opts.(o));
+     varargin = varargin( keep );
+      opts.(o)=1;
+   end
  end
 
-
-
+ %% make sure we know what we are doing
+ if opts.trialonly && opts.mergecormis
+    error('should not merge correct and catch and do trialonly')
+ end
+ if ~opts.sepcorrect && opts.mergecormis
+    error('not sep. correct but merging cor and miss ... why?')
+ end
 
  a=load(mat);
  
@@ -60,7 +83,7 @@ function vals=write1DAtt(mat,varargin)
   %re_corr(correct==-1)=3; % or too slow (missed)
 
   % combine types for easier 3dDeconvolve WFMJ 20150429
-  if mergecormis
+  if opts.mergecormis
     re_corr(correct==-1)=2; % or too slow (missed) -- record with wrong
     re_corr(re_corr==4) =1; % pull catch into correct
   end
@@ -117,9 +140,25 @@ function vals=write1DAtt(mat,varargin)
                       ... '_d'  num2str(drct(t)) ...
                     ];
 
-           if sepcorrect
+           if opts.sepcorrect
 	      savename=[savename '_c' re_corrNames{re_corr(t)} ];
 	   end
+
+
+           % WF 20150508 only use trial onset, not events
+           if opts.trialonly
+	     % only care about the trial type
+	     savename=ttype{types(t)};
+
+	     % only for correct (not catch, miss, or error) trials
+	     % and only if we are looking at cue
+             if ~ (re_corr(t) == 1 && strncmp('cue',fieldNames{i},3 ) )
+		 continue
+             end
+           end
+
+
+        
 
            if ~isfield(vals,savename)
               vals.(savename){a.noBlocks} = []; 

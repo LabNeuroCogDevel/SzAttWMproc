@@ -32,6 +32,7 @@ cd $s
 #set the directory
 sdir=$(pwd);
 s=$(dirname $sdir)
+s2=$(basename $sdir)
 
 # find run (i.e., attention_X1, attention_X2)
 [ -z "$2" ] && echo "need a second argument: what run?" && exit 1
@@ -73,23 +74,22 @@ ppdir=$sdir/preproc/$savename
 cd $ppdir
 
 # test we haven't done this before
-fc=$(find . -name 'nfswdktm_*.nii.gz'|wc -l)
-[[ "$fc" -ge "2" ]] && echo "already have nfswdktm_*, consider removing $(pwd)/nfswdktm_* before running $0 $@" && exit 1
+#fc=$(find . -name 'nfswdktm_*.nii.gz'|wc -l)
+#[[ "$fc" -ge "2" ]] && echo "already have nfswdktm_*, consider removing $(pwd)/nfswdktm_* before running $0 $@" && exit 1
 
 # move from ANALYZE to niifty
-[ ! -r $savename.nii.gz ] && 3dcopy $run $savename.nii.gz
+#[ ! -r $savename.nii.gz ] && 3dcopy $run $savename.nii.gz
 
 # reset TR
 TRreported=$(3dinfo -tr $savename.nii.gz)
-[[ "$TRreported" != "$TR" ]] &&  3drefit -TR $TR $savename.nii.gz
+#[[ "$TRreported" != "$TR" ]] &&  3drefit -TR $TR $savename.nii.gz
 
+find . -mindepth 1 -maxdepth 1 -newer .motion_correction_complete -exec rm -r {} \;
 
 # actually preproc
 echo "preproc $s $savename ($ppdir)"
-preprocessFunctional -4d $savename.nii.gz -tr $TR -mprage_bet $mpragedir/$bet -warpcoef $mpragedir/$warp -threshold 98_2 -hp_filter 100 -rescaling_method 10000_globalmedian -template_brain MNI_2.3mm -func_struc_dof bbr -warp_interpolation spline -constrain_to_template y -wavelet_despike -4d_slice_motion -custom_slice_times $timing1d -mc_movie -motion_censor fd=0.9,dvars=20 -startover
+preprocessFunctional -4d $savename.nii.gz -tr $TR -mprage_bet $mpragedir/$bet -warpcoef $mpragedir/$warp -threshold 98_2 -hp_filter 100 -rescaling_method 10000_globalmedian -template_brain MNI_2.3mm -func_struc_dof bbr -warp_interpolation spline -constrain_to_template y -wavelet_despike -wavelet_m1000 -wavelet_threshold 10 -4d_slice_motion -custom_slice_times $timing1d -mc_movie -motion_censor fd=0.9,dvars=20 -nuisance_file nuisance_regressors.txt -nuisance_compute csf,dcsf,wm,dwm -func_refimg "/Volumes/Phillips/P5/subj/$s2/MB/ep2d_MB_attention_X1_twix_ref.hdr" -fm_phase "/Volumes/Phillips/P5/subj/$s2/gre_field_mapping_new_96x90.14/MR*" -fm_magnitude "/Volumes/Phillips/P5/subj/$s2/gre_field_mapping_new_96x90.13/MR*" -fm_cfg clock
 
-# dont have fieldmap! 
-# -fm_phase /Volumes/Serena/MMClock/MR_Raw/10638_20140507/gre_field_mapping_new_96x90.15/MR* -fm_magnitude /Volumes/Serena/MMClock/MR_Raw/10638_20140507/gre_field_mapping_new_96x90.14/MR* -fm_cfg clock 
 
 # everything is okay!
 exit 0

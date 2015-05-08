@@ -23,7 +23,7 @@ flagfile=avalToMeg
 id=$1
 [ -z "$id" ]  && echo "need id as first argument" && exit 1
 
-function findmprage{
+function findmprage() {
  find $subjsdir/$id/tfl-multiecho-epinav-* -name mprage.nii.gz|tail -n1
 }
 
