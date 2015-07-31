@@ -10,10 +10,9 @@
 
 scriptdir=$(cd $(dirname $0); pwd)
 subjsdir=$(cd $scriptdir/../subj;pwd)
-# google doc location
-#url=https://docs.google.com/spreadsheets/d/1tklWovQor7Nt3m0oWsiP2RPRwDauIS8QUtY4la2kHac
-googleSheet="$scriptdir/SubjInfoGoogleSheet.txt"
-[ ! -r $googleSheet ] && echo "cannot find/open $googleSheet!" && exit 1
+
+# get MEGID from google sheet given a lunaid
+source $scriptdir/MEGID.src.bash
 
 host=open@reese # edit ~/.ssh/config and ssh-copy-id for automation 
 remotepath='~/P5'
@@ -48,12 +47,7 @@ fi
 [ -z "$file" ]  && echo "preprocessMprage broken? couldn't find mprage.nii.gz for $id after running" && exit 1
 
 
-#MEGID=$(curl -s "$url/export?format=tsv"| awk "(\$4==\"$id\"){print \$2}")
-#MEGID=$(awk "(\$4==\"$id\"){print \$2}" "$googleSheet" ) # awk doesn't care about white spaces, can mess up column num, 20150106WF
-#MEGID=$(perl -F"\t" -slane "print \$F[1] if(\$F[3]==\"$id\")" "$googleSheet" ) # WF20150225 -- someone updated the sheet, id is now 5th column?
-MEGID=$(perl -F"\t" -slane "print \$F[1] if(\$F[4]==\"$id\")" "$googleSheet" )
-[ -z "$MEGID" ]  && echo "cannot find $id in sheet\n see $googleSheet (pulled from google in 00_fetchData.bash)" && exit 1
-
+MEGID="$(getMEGID $id )"
 uploadpath=$host:$remotepath/MEG${MEGID}_MR${id}_mprage.nii.gz
 rsync -vhi $file $uploadpath
 
