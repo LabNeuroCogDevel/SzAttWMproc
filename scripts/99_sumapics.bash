@@ -7,18 +7,18 @@ function DriveAFNI {
    sleep 1;
 }
 
-pval=05
+pval=01
 
 #what key shows only that hemisphere
 # for LH we want to disable the RH
 LH='['
 RH=']'
 
-stdbrain=$HOME/standard
+stdbrain=/Users/mariaj/abin/standard
 # where to get contrasts
-dsetdir=$scriptdir/../group_analyses/Att/ttest_by_cond_2015-05-12/
+dsetdir=$scriptdir/../group_analyses/Att/ttest_by_cond_2015-10-26/
 # where to save images
-imgdir=$scriptdir/../group_analyses/Att/ttest_by_cond_2015-05-12/imgs
+imgdir=$scriptdir/../group_analyses/Att/ttest_by_cond_2015-10-26/imgs
 [ ! -d "$imgdir" ] && mkdir $imgdir
 
 # where is the mni template brain surf and nii

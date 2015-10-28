@@ -26,4 +26,6 @@ for visitdir in ../subj/*/; do
    cohort=$(perl -F"\t" -slane "print \$F[8] if(\$F[3]==\"$id\")" "$googleSheet" )
 #use those variables to run that command
    ./getBehave_single.bash $id $cohort;
+#20150520 MJ - add attention_redo for Att bycorrect_mrg & correct_trialOnly
+   ./redo_attention1D.bash $id;
 done

@@ -1,3 +1,5 @@
+% parse mat file into a matrix and header
+% to be parsed to csv by writeBehavCSV.m
 function r=attBehav(matfile)
    s=load(matfile);
    

@@ -21,7 +21,7 @@
 set -e
 
 #what does the final output look like
-finalpfix="nfswdktm"
+finalpfix="nfswudktm"
 
 CFGFILE="$(dirname $0)/jobs_cfg.bash"
 # pull in waitForJobs function
@@ -38,7 +38,10 @@ cd $(dirname $0)/..
 # find all multiband images for attention and workingmemory 
 #  preprocess all of those that need it
 find subj/*/MB/ -type f -iname '*img' -and -not -iname '*ref.img'  \
-	          -and \( -iname '*attention*' -or -iname '*working_Memory*' -or -iname '*workingMemory*' \) |
+     -and \( -iname '*attention*' -or -iname '*working_Memory*' -or -iname '*workingMemory*' \) |
+       #-and \( -iname '*working_Memory*' -or -iname '*workingMemory*' \) |
+     #-and \( -iname '*attention*' \) |
+   
 while read MBimg; do
 	# get subject_visit 
 	subj=$(basename $(dirname $(dirname $MBimg)))
@@ -59,12 +62,12 @@ while read MBimg; do
 
 	# skip if we already have preproccesed directory
 	# and we dont want to redo
-	[ -z "$REDO" && -r subj/$subj/preproc/$savedir/$finalpfix_${savedir}_5.nii.gz ] && continue
+	[ -z "$REDO" -a -r subj/$subj/preproc/$savedir/$finalpfix_${savedir}_5.nii.gz ] && continue
 
 	skipmefile="subj/$subj/preproc/$savedir/skipme"
 	[ -r "$skipmefile" ] && echo "skiping $subj $savedir ($skipmefile)" && continue
 	# if we have the directory but not the final file, something went wrong before
-	[ -z "$REDO" && -d subj/$subj/preproc/$savedir ] && \
+	[ -z "$REDO" -a -d subj/$subj/preproc/$savedir ] && \
 	       	echo "* WARNING: $subj $savedir folder exists but not final preproc, trying to redo now!" && \
 		echo "           'date > $skipmefile'  to skip"
 

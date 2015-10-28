@@ -6,6 +6,11 @@
 %     only grab from cue times (trial onset) for correct (not wrong,slow, or catch)
 %  ctch=crct;slw=wrng 
 %     merge catch and correct, merge wrong and too slow
+%
+%  sepside
+%     display side of action cue
+%  sepdir
+%     left/right direction of button push cue
 % ---
 % trialonly forces correct and will be useless if run with ctch=crct (b/c how long trial is will be a mystery)
 
@@ -18,8 +23,12 @@ function vals=write1DAtt(mat,varargin)
  opts.sepcorrect=find(cell2mat(cellfun(@(x) ~isempty(strmatch(x,'correct')), varargin,'UniformOutput',0)));
  opts.trialonly=find(cell2mat(cellfun(@(x) ~isempty(strmatch(x,'trialonly')), varargin,'UniformOutput',0)));
  opts.mergecormis=find(cell2mat(cellfun(@(x) ~isempty(strmatch(x,'ctch=crct;slw=wrg')), varargin,'UniformOutput',0)));
+ % sep 1d files for the side of target
+ opts.sepside=find(cell2mat(cellfun(@(x) ~isempty(strmatch(x,'sepside')), varargin,'UniformOutput',0)));
+ % sep what button should have been pushed
+ opts.sepdir=find(cell2mat(cellfun(@(x)  ~isempty(strmatch(x,'sepdir')), varargin,'UniformOutput',0)));
 
- % remove opts from varargin
+ % remove opts from varargin (because varargin is used for file naming too)
  % bool their existence (make them T/F flags)
  for o=fieldnames(opts)'
    o=o{1};
@@ -28,7 +37,7 @@ function vals=write1DAtt(mat,varargin)
    else 
      keep=setdiff(1:length(varargin),opts.(o));
      varargin = varargin( keep );
-      opts.(o)=1;
+     opts.(o)=1;
    end
  end
 
@@ -100,7 +109,7 @@ function vals=write1DAtt(mat,varargin)
 
      if(startB > obsTrials || endB > obsTrials)
          warning('*** LOOKING FOR BLOCK %d (TRIALS %d-%d) BUT CAN ONLY FIND %d TRIALS! ****',b,startB,endB,obsTrials);
-	 break
+         break
      end
 
      initTime = a.starttime(b);
@@ -140,24 +149,34 @@ function vals=write1DAtt(mat,varargin)
                       ... '_d'  num2str(drct(t)) ...
                     ];
 
-           if opts.sepcorrect
-	      savename=[savename '_c' re_corrNames{re_corr(t)} ];
-	   end
 
+           if opts.sepcorrect
+              savename=[savename '_c' re_corrNames{re_corr(t)} ];
+           end
 
            % WF 20150508 only use trial onset, not events
+           %   -- only for full correct trials
            if opts.trialonly
-	     % only care about the trial type
-	     savename=ttype{types(t)};
+             % only care about the trial type
+             savename=ttype{types(t)};
 
-	     % only for correct (not catch, miss, or error) trials
-	     % and only if we are looking at cue
+             % only for correct (not catch, miss, or error) trials
+             % and only if we are looking at cue
              if ~ (re_corr(t) == 1 && strncmp('cue',fieldNames{i},3 ) )
-		 continue
+                 continue
              end
            end
 
+           % WF 20150521 -- want to know if we are on left or right
+           %    20150526 -- this is the side the target is displayed, but not the direction to push
+           if opts.sepside
+             savename=[savename '_sd' num2str(side(t)) ];
+           end
 
+           % WF 20150526 -- what button should have been pushed
+           if opts.sepdir
+             savename=[savename '_d'  num2str(drct(t)) ];
+           end
         
 
            if ~isfield(vals,savename)

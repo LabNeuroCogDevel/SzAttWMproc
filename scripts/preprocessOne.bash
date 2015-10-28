@@ -23,7 +23,7 @@ timing1d=/Volumes/Phillips/P5/scripts/sliceTimings.1D
 # actual TR, 3dcopy of hdr doesn't maintain TR in header
 TR=1.0
 # what does the final nii.gz start with
-finalpfix="nfswdktm"
+finalpfix="nfswudktm"
 
 scriptdir=$(cd $(dirname $0);pwd)
 subjdir=$(cd $scriptdir/../subj;pwd)
@@ -100,10 +100,11 @@ cd $ppdir
 
 # test we haven't done this before if we dont explicitly say to REDO
 if [ -z "$REDO" ]; then
-  fc=$(find . -name "$finalpfix_*.nii.gz"|wc -l)
-  [[ "$fc" -ge "2" ]] && echo "already have nfswdktm_*, consider 
+  fc=$(find . -iname "${finalpfix}_*.nii.gz"|wc -l)
+
+  [[ "$fc" -ge "2" ]] && echo "already have ${finalpfix}_* ('$fc'), consider 
   REDO=1 $0 $@ 
-or removing $(pwd)/nfswdktm_*" && exit 1
+or removing $(pwd)/${finalpfix}_*" && exit 1
 fi
 
 # move from ANALYZE to niifty
@@ -115,7 +116,9 @@ diff=$(echo "$TRreported - $TR" | bc -l )
 # can not use -eq 0 becuase diff might be non-digit (e.g. ".5")
 [[ "$diff" != "0" ]] &&  3drefit -TR $TR $savename.nii.gz
 
-find . -mindepth 1 -maxdepth 1 -newer .motion_correction_complete -exec rm -r {} \;
+# we do not want to do slicetiming again.. it takes forever and we trust it
+#[ -r .temporal_filtering_complete ] && \
+#  find . -mindepth 1 -maxdepth 1 -newer .temporal_filtering_complete -exec rm -r {} \;
 
 # actually preproc
 echo "preproc $s $savename ($ppdir)"
@@ -124,6 +127,7 @@ preprocessFunctional -4d $savename.nii.gz -tr $TR \
 	 -mprage_bet $mpragedir/$bet -warpcoef $mpragedir/$warp \
 	 -threshold 98_2 -hp_filter 100 \
 	 -rescaling_method 10000_globalmedian \
+	 -delete_dicom no \
 	 -template_brain MNI_2.3mm -func_struc_dof bbr -warp_interpolation spline \
 	 -constrain_to_template y -wavelet_despike -wavelet_m1000 -wavelet_threshold 10 \
 	 -4d_slice_motion -custom_slice_times $timing1d -mc_movie \
@@ -131,7 +135,8 @@ preprocessFunctional -4d $savename.nii.gz -tr $TR \
 	 -nuisance_compute csf,dcsf,wm,dwm \
 	 -func_refimg $refimg \
 	 -fm_phase "$fm_phase/MR*" -fm_magnitude "$fm_mag/MR*" \
-	 -fm_cfg clock
+	 -fm_cfg clock \
+         -startover
 
 
 # everything is okay!

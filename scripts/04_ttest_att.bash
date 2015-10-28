@@ -15,9 +15,9 @@ set -e
 trap '[ "$?" -ne 0 ] && echo "$0 ended with error!"' EXIT 
 
 # which conditions do we want to compare between controls and patients
-conditions=(att_pop_cor att_hab_cor att_flx_cor cue_pop_cor cue_hab_cor cue_flx_cor prb_pop_cor prb_hab_cor prb_flx_cor att_habVpop_GLT att_flxVpop_GLT att_flxVhab_GLT cue_habVpop_GLT cue_flxVpop_GLT cue_flxVhab_GLT prb_habVpop_GLT prb_flxVpop_GLT prb_flxVhab_GLT)
+conditions=(cue_pop_cor att_pop_cor prb_pop_cor cue_hab_cor att_hab_cor prb_att_cor cue_flx_cor att_flx_cor prb_flx_cor cue_GLT att_GLT prb_GLT att_habVpop_GLT att_flxVpop_GLT att_flxVhab_GLT cue_habVpop_GLT cue_flxVpop_GLT cue_flxVhab_GLT prb_habVpop_GLT prb_flxVpop_GLT prb_flxVhab_GLT)
 
-con_num=(1 4 7 10 13 16 19 22 25 28 31 34 37 40 43 46 49 52)
+con_num=(1 4 7 10 13 16 19 22 25 31 34 37 40 43 46 49 52 55 58 61 64)
 
 # we are using the 2.3mm brain in our final fun->mni warp
 mask=$HOME/standard/mni_icbm152_nlin_asym_09c/mni_icbm152_t1_tal_nlin_asym_09c_mask_2.3mm.nii
@@ -51,7 +51,7 @@ cut -f10 -d "	" $subjtxt|sed 1d | sort | uniq | while read cohort; do echo -n ""
 #  - `echo >>` to write/append each contrast in the approprate cohort text file
 #MJ20150225 - google sheet updated $MRID in field 5 instead of 4
 sed 1d "$subjtxt" | cut -f5,10 -d"	" | while read MRID cohort; do
- contrastfile="$maindir/subj/$MRID/contrasts/Att/simpledContrasts_2runs_stats2+tlrc.HEAD"
+ contrastfile="$maindir/subj/$MRID/contrasts/Att/contrasts_modelinc_2runs_stats+tlrc.HEAD"
 
  [ ! -r "$contrastfile" ] && 
      echo "SKIPPING $MRID ($cohort): no contrasts file ($contrastfile)" && 
@@ -73,7 +73,7 @@ for i in $(seq 0 ${#conditions[@]}); do
 
   # define where to save the ttest output
   # make sure the directory exists
-  ttestdir="$pathAnaly/ttest_$(date +%F)"
+  ttestdir="$pathAnaly/ttest_modelinc_$(date +%F)"
   [ ! -d $ttestdir ] && mkdir -p $ttestdir
 
   #run test
@@ -85,6 +85,7 @@ for i in $(seq 0 ${#conditions[@]}); do
 	    -labelB P \
             -prefix $ttestdir/${cond}
 done
+
 
 ## put all tests into one giant file
 #3dbucket -prefix $pathAnaly/ttest/$(date +%F)_Att $pathAnaly/ttest/*/$(date +%F_*.BRIK

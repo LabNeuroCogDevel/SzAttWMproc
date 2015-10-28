@@ -21,4 +21,6 @@ for t1dir in subj/*/tfl*; do
 	[ ! -r $t1dir/avalToMeg ] && scripts/cpMprage_singleSubj.bash $(basename $(dirname $t1dir));
 done
 
+wait
+
 exit 0

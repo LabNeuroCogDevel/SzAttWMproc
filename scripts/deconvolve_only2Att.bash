@@ -40,7 +40,7 @@ cd $contrasts
 model="BLOCK(.5,1)" # everything we model is .5s long
 bmodel="BLOCK(96,1)" # blocks are about 95 seconds long (91--100)
 
-prefix=simpledContrasts_2runs
+prefix=contrasts_modelinc_2runs_stats
 
 
 # make sure we only have 2 runs in each of the stims
@@ -68,6 +68,8 @@ cd $oneddir
 
 cd $contrasts
 
+#combine the censor files into 1 big censor file
+cat $sdir/preproc/attention_1/motion_info/censor_union.1D $sdir/preproc/attention_2/motion_info/censor_union.1D > censor_total.1D
 
 
 
@@ -78,9 +80,8 @@ pattern=attention_[12]
 
 
 3dDeconvolve  \
-        -input $sdir/preproc/$pattern/nfswdktm_${pattern}_5.nii.gz \
-	-CENSORTR <( cat $sdir/preproc/attention_*/motion_info/censor_union.1D) \
-	\
+        -input $sdir/preproc/$pattern/nfswudktm_${pattern}_5.nii.gz \
+	-CENSORTR censor_total.1D \
 	-allzero_OK \
 	-GOFORIT 4 \
 	-num_stimts 10 \
@@ -109,12 +110,12 @@ pattern=attention_[12]
 	-gltsym 'SYM:.5*prb_flx_cor -.5*prb_hab_cor'                    -glt_label 12 prb_flxVhab \
 	-overwrite \
 	-xjpeg design_matrix.png \
-	-fout -tout -x1D Xmat.x1D -fitts ${prefix}_fitts -bucket ${prefix}_stats
+	-fout -tout -x1D ${prefix}_Xmat.x1D -fitts ${prefix}_fitts -bucket ${prefix}_stats
 	
 # we want to have a template too
 [ -r template.nii ] || ln -s $(readlink $sdir/tfl-multiecho-*/template_brain.nii) template.nii
 
 #REMLfit cmd, getting rid of temporal autocorrelation, may want to use
-3dREMLfit -matrix Decon.xmat.1D \
- -input  -input $sdir/preproc/$pattern/nfswdktm_${pattern}_5.nii.gz \
- -Rbuck Decon_REML -Rvar Decon_REMLvar -verb $*
+#3dREMLfit -matrix ${prefix}_Xmat.x1D \
+ #-input  -input $sdir/preproc/$pattern/nfswdktm_${pattern}_5.nii.gz \
+ #-Rbuck ${prefix}_Decon_REML -Rvar ${prefix}_Decon_REMLvar -verb $*

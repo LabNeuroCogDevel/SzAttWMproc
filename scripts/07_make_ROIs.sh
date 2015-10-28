@@ -7,7 +7,7 @@ whereami -prefix BA40_R -mask_atlas_region 'TT_Daemon:116'
 whereami -prefix BA46_L -mask_atlas_region 'TT_Daemon:322'
 whereami -prefix BA46_R -mask_atlas_region 'TT_Daemon:122'
 whereami -prefix BA09_L -mask_atlas_region 'TT_Daemon:289'
-whereami -prefix BA09_R -mask_atlas_region 'TT_Daemon:9'
+whereami -prefix BA09_R -mask_atlas_region 'TT_Daemon:89'
 whereami -prefix BA17_L -mask_atlas_region 'TT_Daemon:294'
 whereami -prefix BA17_R -mask_atlas_region 'TT_Daemon:94'
 
