@@ -10,12 +10,20 @@ function vals=write1DWM_v3(mat,varargin)
 % - (4) "sepdir" = create separate 1d files for whether subject pushed left or right button
 % - (5) "trialonly" = create 1d files for onset of each trial type (don't try to model different phases--cue, fix, delay, probe)
 
-opts.sepcorrect=find(cell2mat(cellfun(@(x) ~isempty(strmatch(x,'correct')), varargin,'UniformOutput',0)));
-opts.mergecormis=find(cell2mat(cellfun(@(x) ~isempty(strmatch(x,'ctch=crct;slw=wrg')), varargin,'UniformOutput',0)));
-opts.sepside=find(cell2mat(cellfun(@(x) ~isempty(strmatch(x,'sepside')),varargin,'UniformOutput',0))); 
-opts.sepdir=find(cell2mat(cellfun(@(x)  ~isempty(strmatch(x,'sepdir')),varargin,'UniformOutput',0))); %GM 071315 - not currently enabled; can't find necessary info for this option in mat file
-opts.sepchange=find(cell2mat(cellfun(@(x) ~isempty(strmatch(x,'sepchange')),varargin,'UniformOutput',0))); %WF20151109 - merge more
-opts.trialonly=find(cell2mat(cellfun(@(x) ~isempty(strmatch(x,'trialonly')), varargin,'UniformOutput',0))); %GM071315 - not currently enabled
+opts.sepcorrect =testoption('correct'          ,varargin{:});
+opts.mergecormis=testoption('ctch=crct;slw=wrg',varargin{:});
+opts.sepside    =testoption('sepside'          ,varargin{:}); 
+opts.sepdir     =testoption('sepdir'           ,varargin{:}); %GM 071315 - not currently enabled; can't find necessary info for this option in mat file
+opts.sepchange  =testoption('sepchange'        ,varargin{:}); %WF20151109 - merge more
+opts.trialonly  =testoption('trialonly'        ,varargin{:}); %GM071315 - not currently enabled
+opts,
+
+
+%opts.sepcorrect=find(cell2mat(cellfun(@(x) ~isempty(strmatch(x,'correct')), varargin,'UniformOutput',0)));
+%opts.mergecormis=find(cell2mat(cellfun(@(x) ~isempty(strmatch(x,'ctch=crct;slw=wrg')), varargin,'UniformOutput',0)));
+%opts.sepside=find(cell2mat(cellfun(@(x) ~isempty(strmatch(x,'sepside')),varargin,'UniformOutput',0))); 
+%opts.sepdir=find(cell2mat(cellfun(@(x)  ~isempty(strmatch(x,'sepdir')),varargin,'UniformOutput',0))); %GM 071315 - not currently enabled; can't find necessary info for this option in mat file
+%opts.trialonly=find(cell2mat(cellfun(@(x) ~isempty(strmatch(x,'trialonly')), varargin,'UniformOutput',0))); %GM071315 - not currently enabled
 
 %After reading option(s),remove them from varargin (because varargin is used for file naming too)
 %Bool their existence for later
@@ -87,8 +95,8 @@ fieldNames=fieldNames(structIdxs);
   %will identify whether trials were correct, incorrect, etc. The code immediately below 
   %will then lead to the merger of the desired files (but only if "sepcorrect" is enabled).  
   if opts.mergecormis
-  re_corr(correct==-1)=2; % or too slow (missed) -- record with wrong
-  re_corr(re_corr==4) =1; % pull catch into correct
+    re_corr(correct==-1)=2; % or too slow (missed) -- record with wrong
+    re_corr(re_corr==4) =1; % pull catch into correct
   end
   
   
@@ -194,30 +202,31 @@ if(~isempty(varargin) && ischar(varargin{1}))
      mkdir(oneDfolder);
 end
 
-%Write dummy 1D files in case some conditions have no events (these get
-%overwritten in next step if data exists)
-
-cue_files= {'cue_ld1_Correct.1D','cue_ld1_Wrong.1D','cue_ld3_Correct.1D','cue_ld3_Wrong.1D'};
-for i=1:length(cue_files)
-    cue_output=[oneDfolder '/' cue_files{i}];
-    fid=fopen(cue_output,'w');
-    fprintf(fid,'*');
-    fprintf(fid,'\n');
-    fprintf(fid,'-1:0');
-    fclose(fid);
-end 
-
-other_files= {'delay_ld1_dly0_Correct.1D','delay_ld1_dly0_Wrong.1D','delay_ld1_dly1_Correct.1D','delay_ld1_dly1_Wrong.1D',...
-              'delay_ld3_dly0_Correct.1D','delay_ld3_dly0_Wrong.1D','delay_ld3_dly1_Correct.1D','delay_ld3_dly1_Wrong.1D',...
-              'probe_ld1_chg0_Correct.1D','probe_ld1_chg0_Wrong.1D','probe_ld1_chg1_Correct.1D','probe_ld1_chg1_Wrong.1D',...
-              'probe_ld3_chg0_Correct.1D','probe_ld3_chg0_Wrong.1D','probe_ld3_chg1_Correct.1D','probe_ld3_chg1_Wrong.1D'};
-for j=1:length(other_files)
-    other_output=[oneDfolder '/' other_files{j}];
-    fid=fopen(other_output,'w');
-    fprintf(fid,'*');
-    fprintf(fid,'\n');
-    fprintf(fid,'*');
-    fclose(fid);
+%%% %Write dummy 1D files in case some conditions have no events (these get
+%%% %overwritten in next step if data exists)
+%%% 
+%%% cue_files= {'cue_ld1_Correct.1D','cue_ld1_Wrong.1D','cue_ld3_Correct.1D','cue_ld3_Wrong.1D'};
+%%% for i=1:length(cue_files)
+%%%     cue_output=[oneDfolder '/' cue_files{i}];
+%%%     fid=fopen(cue_output,'w');
+%%%     fprintf(fid,'*');
+%%%     fprintf(fid,'\n');
+%%%     fprintf(fid,'-1:0');
+%%%     fclose(fid);
+%%% end 
+%%% 
+%%% other_files= {'delay_ld1_dly0_Correct.1D','delay_ld1_dly0_Wrong.1D','delay_ld1_dly1_Correct.1D','delay_ld1_dly1_Wrong.1D',...
+%%%               'delay_ld3_dly0_Correct.1D','delay_ld3_dly0_Wrong.1D','delay_ld3_dly1_Correct.1D','delay_ld3_dly1_Wrong.1D',...
+%%%               'probe_ld1_chg0_Correct.1D','probe_ld1_chg0_Wrong.1D','probe_ld1_chg1_Correct.1D','probe_ld1_chg1_Wrong.1D',...
+%%%               'probe_ld3_chg0_Correct.1D','probe_ld3_chg0_Wrong.1D','probe_ld3_chg1_Correct.1D','probe_ld3_chg1_Wrong.1D'};
+%%% for j=1:length(other_files)
+%%%     other_output=[oneDfolder '/' other_files{j}];
+%%%     fid=fopen(other_output,'w');
+%%%     fprintf(fid,'*');
+%%%     fprintf(fid,'\n');
+%%%     fprintf(fid,'*');
+%%%     fclose(fid);
+%%% 
 
 %For each savename fieldvalue from vals
  for v = fieldnames(vals)'
@@ -249,6 +258,6 @@ end %function
 
 % WF20151109 -- function to check for option(checkstr) in varargin
 % returns 1 if there, 0 if not
-function b= testchar(checkstr,varargin)
+function b=testoption(checkstr,varargin)
   b=find(cell2mat(cellfun(@(x) ~isempty(strmatch(x,checkstr)), varargin,'UniformOutput',0)));
 end
