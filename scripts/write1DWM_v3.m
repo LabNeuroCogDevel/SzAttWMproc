@@ -10,12 +10,15 @@ function vals=write1DWM_v3(mat,varargin)
 % - (4) "sepdir" = create separate 1d files for whether subject pushed left or right button
 % - (5) "trialonly" = create 1d files for onset of each trial type (don't try to model different phases--cue, fix, delay, probe)
 
-opts.sepcorrect =testoption('correct'          ,varargin{:});
-opts.mergecormis=testoption('ctch=crct;slw=wrg',varargin{:});
-opts.sepside    =testoption('sepside'          ,varargin{:}); 
-opts.sepdir     =testoption('sepdir'           ,varargin{:}); %GM 071315 - not currently enabled; can't find necessary info for this option in mat file
-opts.sepchange  =testoption('sepchange'        ,varargin{:}); %WF20151109 - merge more
-opts.trialonly  =testoption('trialonly'        ,varargin{:}); %GM071315 - not currently enabled
+opts.sepcorrect   =testoption('correct'          ,varargin{:});
+opts.mergecormis  =testoption('ctch=crct;slw=wrg',varargin{:});
+opts.sepside      =testoption('sepside'          ,varargin{:}); 
+opts.sepdir       =testoption('sepdir'           ,varargin{:}); %GM 071315 - not currently enabled; can't find necessary info for this option in mat file
+opts.sepchange    =testoption('sepchange'        ,varargin{:}); %WF20151109 - merge more
+opts.trialonly    =testoption('trialonly'        ,varargin{:}); %GM071315 - not currently enabled
+opts.wrongtogether=testoption('wrongtogether'    ,varargin{:}); %GM071315 - not currently enabled
+opts.isimodulation=testoption('isimodulation'    ,varargin{:}); %GM071315 - not currently enabled
+
 opts,
 
 
@@ -132,25 +135,37 @@ for i=1:length(fieldNames)
             onsettime= sprintf('%.2f',onsettime); %for AFNI formatting purposes (see "cue" below)
             
             % For the cue condition, calculate the length of the ISI between cue and mem
-            if strmatch('cue',fieldNames{i})
+            if 0 && any(strmatch('cue',fieldNames{i})) && ~isempty(opts.isimodulation)
+                fprintf('isi modulation\n')
                 isi_dur= a.trial(t).timing.mem.onset - a.trial(t).timing.isi.onset;
                 block_dur= isi_dur + 0.40; %(cue = 0.2s and mem= 0.2s)
                 block_dur= sprintf('%.2f',block_dur);
                 onsettime= [onsettime ':' block_dur]; %format for use with AFNI's -stim_times_AM1 option
             end 
             
-            savename= fieldNames{i};
             
-           if isempty(strmatch(fieldNames{i},'fix')) % If it's anything BUT fix (i.e. cue, delay, or probe) then "load" will be relevant and must be recorded
+            
+           savename= fieldNames{i};
+
+           % clear savename if wrong and we want all the wrongs together
+           wrongtogether = all(opts.wrongtogether & re_corr(t) == 2);
+           if wrongtogether 
+             savename='';
+           end
+            
+           % If it's anything BUT fix (i.e. cue, delay, or probe) 
+           % then "load" will be relevant and must be recorded
+           % -- we dont care what load if we are lumping all wrongtogether and it is wrong
+           if isempty(strmatch(fieldNames{i},'fix')) & ~wrongtogether
                 savename = [savename '_ld' num2str(loadn(t))];
                                      %'_sd' num2str( side(t)) ]; %GM 071315-- make separation by side optional (specify in varargin)
            end
 
            %Do we want to sep change/nochange?
            % also tied to delay length, maybe?
-           if opts.sepchange
+           if opts.sepchange & ~wrongtogether
                 %If it's probe, then additionally, "change" will be relevant and must be recorded
-                if strmatch('probe',fieldNames{i}) 
+                if strmatch('probe',fieldNames{i})  
                     savename = [savename '_chg' num2str(changes(t)) ]; 
                %If it's delay, then additionally, "delay" will be relevant and must be recorded
                 elseif  strmatch('delay',fieldNames{i}) 
@@ -159,12 +174,17 @@ for i=1:length(fieldNames)
            end
 
            % Do we want to seperate correct?
-           if opts.sepcorrect
-              savename = [savename '_' re_corrNames{re_corr(t)} ];
+           if opts.sepcorrect 
+              % if wrong and all of them are together
+              % would start with _, and that's a matlab no-no
+              sep = '_';
+              if wrongtogether, sep=''; end
+
+              savename = [savename sep re_corrNames{re_corr(t)} ];
            end
            
             %Do we want to separate by side? 
-           if opts.sepside
+           if opts.sepside & ~wrongtogether
              savename=[savename '_sd' num2str(side(t)) ];
            end
 
