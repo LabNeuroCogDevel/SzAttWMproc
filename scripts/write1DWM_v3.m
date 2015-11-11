@@ -14,12 +14,12 @@ opts.sepcorrect   =testoption('correct'          ,varargin{:});
 opts.mergecormis  =testoption('ctch=crct;slw=wrg',varargin{:});
 opts.sepside      =testoption('sepside'          ,varargin{:}); 
 opts.sepdir       =testoption('sepdir'           ,varargin{:}); %GM 071315 - not currently enabled; can't find necessary info for this option in mat file
-opts.sepchange    =testoption('sepchange'        ,varargin{:}); %WF20151109 - merge more
+opts.sepchange    =testoption('sepchange'        ,varargin{:}); 
 opts.trialonly    =testoption('trialonly'        ,varargin{:}); %GM071315 - not currently enabled
-opts.wrongtogether=testoption('wrongtogether'    ,varargin{:}); %GM071315 - not currently enabled
-opts.isimodulation=testoption('isimodulation'    ,varargin{:}); %GM071315 - not currently enabled
+opts.wrongtogether=testoption('wrongtogether'    ,varargin{:}); %WF20151109 - merge more
+opts.noisimodulation=testoption('noisimodulation'    ,varargin{:}); %WF20151111 - no stim_am for cue+isi
 
-opts,
+%opts,
 
 
 %opts.sepcorrect=find(cell2mat(cellfun(@(x) ~isempty(strmatch(x,'correct')), varargin,'UniformOutput',0)));
@@ -131,12 +131,27 @@ for i=1:length(fieldNames)
             if  onsettime < 0 || isinf(onsettime) || isnan(onsettime)
                 continue
             end
+
+
+            % savename starts like cue,fix,probe,etc
+            savename= fieldNames{i};
+
+            % clear savename if wrong and we want all the wrongs together
+            wrongtogether = all(opts.wrongtogether & re_corr(t) == 2);
+            if wrongtogether 
+              savename='';
+            end
             
+            
+            %% onset of event
+            % normally, rounded two 2
             onsettime= sprintf('%.2f',onsettime); %for AFNI formatting purposes (see "cue" below)
             
+            % unless we want to modulate the response, then we need 'onset:duration'
             % For the cue condition, calculate the length of the ISI between cue and mem
-            if 0 && any(strmatch('cue',fieldNames{i})) && ~isempty(opts.isimodulation)
-                fprintf('isi modulation\n')
+            % DO NOT add modulation for wrongtogether
+            %if all(strmatch('cue',fieldNames{i}) & ~wrongtogether & ~opts.noisimodulation )
+            if strmatch('cue',fieldNames{i}) & ~wrongtogether 
                 isi_dur= a.trial(t).timing.mem.onset - a.trial(t).timing.isi.onset;
                 block_dur= isi_dur + 0.40; %(cue = 0.2s and mem= 0.2s)
                 block_dur= sprintf('%.2f',block_dur);
@@ -144,14 +159,6 @@ for i=1:length(fieldNames)
             end 
             
             
-            
-           savename= fieldNames{i};
-
-           % clear savename if wrong and we want all the wrongs together
-           wrongtogether = all(opts.wrongtogether & re_corr(t) == 2);
-           if wrongtogether 
-             savename='';
-           end
             
            % If it's anything BUT fix (i.e. cue, delay, or probe) 
            % then "load" will be relevant and must be recorded
