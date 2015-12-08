@@ -6,6 +6,11 @@ use strict;use warnings;
 use List::MoreUtils 'uniq';
 use Data::Dumper;
 
+## HOW MANY TRIALS TOTAL?
+# currently set at 72, 24 trials per block
+my $nt=72;
+
+
 my $seq=shift;
 my $logfile=shift;
 die "run like: $0 seq logfile" if !$seq || ! $logfile;
@@ -71,8 +76,11 @@ my %st= ('h'=>'Habitual',p=>'Popout',f=>'Flexible');
 # there are 72 trials per run, 24 (=72/3) trials in a mini block
 # count the colors that are presented to get at trial type
 # easier to just look at block number and resported file used (grep .txt)
-for my $e (24,48,72) {
-   my $s = $e-23;
+#for my $e (24,48,72) {
+for my $e ($nt/3,2/3*$nt,72) {
+   #my $s = $e-23;
+   my $s = $e-($nt/3 -1);
+
    my $ttype=$st{ shift @seq };
    #my @subarray = @tlist[$s..$e];
    ##print Dumper(@subarray);
@@ -107,7 +115,7 @@ for my $e (24,48,72) {
 # want to write out files like
 # probe_tPopout_cTooSlow.1D
 my %FH=();
-for my $t (@tlist[1..72]) {
+for my $t (@tlist[1..$nt]) {
  for my $e (qw/fix cue attend probe clear/){
    next unless $t->{$e}; 
    my $fname="${e}_t$t->{type}_c$t->{correctType}.1D";

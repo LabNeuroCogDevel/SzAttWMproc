@@ -21,6 +21,20 @@ function findmr {
   find "$1" -maxdepth 1 -type f -iname 'MR*'            
 }
 
+# look for subject dates to skip
+function isskipsubj {
+ s="$1"
+
+ # subject matches
+ [ $s == "11423_20150902" ] && return 0   # 2 parter, default to: 11423_20150916
+
+ # append other subjects to skip here
+ #[ $s == "99999_yyyymmdd" ] && return 0  # skip because: 
+
+ # otherwise dont skip
+ return 1
+}
+
 
 # link over over MB
 # multiband folder has funny name
@@ -29,6 +43,10 @@ function findmr {
 for mb in /Volumes/Phillips/Raw/MRprojects/P5Sz/multiband/*; do
    s=$(basename $mb)
    [[ ! $s =~ ([0-9]{5})_([0-9]{8}) ]] && warn "$s does not contain luna_date ($mb)" && continue
+
+   # skip some subjects, see func def above
+   isskipsubj $s && continue
+
    l=${BASH_REMATCH[1]}; d=${BASH_REMATCH[2]}; 
    MB="$subjroot/${l}_$d/MB/"
    # need to make directory if it doesn't exit
@@ -47,6 +65,10 @@ done
 for sd in /Volumes/Phillips/Raw/MRprojects/P5Sz/[^m]*/*; do
    s=$(basename $sd)
    [[ ! $s =~ ^([0-9]{5})_([0-9]{8})$ ]] && warn "$s is not like luna_date ($sd)" && continue
+
+   # skip some subjects, see func def above
+   isskipsubj $s && continue
+
    l=${BASH_REMATCH[1]}; d=${BASH_REMATCH[2]}; 
    for f in $sd/*{tfl,diff,gre_field}*/;do
       [ ! -r $f ] && skip "cannot find $f in $sd" && continue
@@ -60,6 +82,7 @@ for sd in /Volumes/Phillips/Raw/MRprojects/P5Sz/[^m]*/*; do
       [ ! -d "$sfdir" ] && mkdir $sfdir
       findmr $f | while read mr; do
          lnto=$sfdir/$(basename $mr)
+         [ ! -r $mr ] && warn "somethings really weird! cannot read dicom $mr, not linking to $lnto!\n\t abandoning linking all of $f" && break
          [ ! -e $lnto ] && ln -s $mr $lnto
       done
 

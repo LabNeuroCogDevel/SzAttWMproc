@@ -16,9 +16,9 @@ RH=']'
 
 stdbrain=/Users/mariaj/abin/standard
 # where to get contrasts
-dsetdir=$scriptdir/../group_analyses/Att/ttest_by_cond_2015-10-26/
+dsetdir=$scriptdir/../group_analyses/Att/HRF/
 # where to save images
-imgdir=$scriptdir/../group_analyses/Att/ttest_by_cond_2015-10-26/imgs
+imgdir=$scriptdir/../group_analyses/Att/HRF/imgs
 [ ! -d "$imgdir" ] && mkdir $imgdir
 
 # where is the mni template brain surf and nii
@@ -75,7 +75,7 @@ read
 
 
 # for each task, we load a new nifti
-for task in Popout Habitual Flexible; do
+for task in HRF2_Popout_masked HRF2_Habitual_masked HRF2_Flexible_masked; do
 
  file=$dsetdir/$task+tlrc.HEAD
 
@@ -95,7 +95,7 @@ for task in Popout Habitual Flexible; do
  sleep 1
 
 
- for msb in 0 2 4; do
+ for msb in 0; do
    # t-stat sub brick is one above mean/contrast brick
    tsb=$((($msb+1)))
 

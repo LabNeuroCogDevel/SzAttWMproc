@@ -11,9 +11,9 @@
 ####### customize me ########
 #
 # where to save output (inside subject dir, also name of matlab script to be gen.)
-savdir=correct_load
+savdir=correct_load_wrongtogether
 # opts are parsed by write1DWM_v3.m
-opts="'ctch=crct;slw=wrg','correct'"
+opts="'ctch=crct;slw=wrg','correct','wrongtogether'"
 #
 #############################
 
