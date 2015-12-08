@@ -4,7 +4,7 @@ function r=WMBehav(matfile)
    dr       = [s.events.playCue];
    ld       = [s.events.load];
    RT       = [s.events.RT];
-   Crt      = [s.events.Correct];
+   Crt      = [s.trial.correct];
    islngdly = [s.events.longdelay];
    ischng   = [s.events.changes];
    

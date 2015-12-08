@@ -57,7 +57,7 @@ cohort="$BASH_REMATCH"
 ## creat 1D files, create behave csv file
 #1D files are the timing files that you are going to need later on
 #prints out the variables you'll need in the "while read section"
-echo  "WM $bea_res/Data/Tasks/P5SzWM/$cohort/$luna/$visit/mat/    $subjdir/$ld/1d/WM  write1DWM  WMBehav
+echo  "WM $bea_res/Data/Tasks/P5SzWM/$cohort/$luna/$visit/mat/    $subjdir/$ld/1d/WM  write1DWM_v3  WMBehav
 Att $bea_res/Data/Tasks/Attention/$cohort/$luna/$visit/mat/ $subjdir/$ld/1d/Att write1DAtt attBehav" |\
  while read task getDir savDir onedfunc behavfunc; do
    ## WM
@@ -71,13 +71,11 @@ Att $bea_res/Data/Tasks/Attention/$cohort/$luna/$visit/mat/ $subjdir/$ld/1d/Att 
    cp $getDir/*mat $savDir/
    mat="$(find $savDir -name '*mat'|sed 1q)"
 
-
    # run matlab
    #running these files: attBehav.m, WMBehav.m, writeBehaveCSV.m
    #2015-05-05WF -- merge correct+catch, wrong+tooslow for attetion done by redo_attetion1D.bash
    #mlcmd="try, write1DAtt('$mat','$savDir/bycorrect_mrg','correct','ctch=crct;slw=wrg'),end;quit;"
    matlab -nodisplay -r "try, $onedfunc('$mat','$savDir'), end;try, $onedfunc('$mat','$savDir/bycorrect','correct'), end; try, $onedfunc('$mat','$savDir/bycorrect_side','ctch=crct;slw=wrg','correct','sepside'), end;try,  writeBehavCSV( $behavfunc('$mat')     ), end;  quit;"
-
 done
 
 
