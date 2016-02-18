@@ -33,7 +33,7 @@ if [ -z "$file" ]; then
   [ -z "$t1dir" ] && echo "cannot find a t1 dir for $id" && exit 1
 
   cd $t1dir
-  preprocessMprage -d archive -r MNI_2mm -p "MR*" &
+  preprocessMprage -d no -r MNI_2mm -p "MR*" &
   sleep 120 # enough time for Dimon to complete
 
   # maybe we didn't way long enough

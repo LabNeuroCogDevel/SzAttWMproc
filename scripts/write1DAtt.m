@@ -11,22 +11,31 @@
 %     display side of action cue
 %  sepdir
 %     left/right direction of button push cue
+%
+%  longcatch
+%     identify/sep long catches (cue+attend)
 % ---
 % trialonly forces correct and will be useless if run with ctch=crct (b/c how long trial is will be a mystery)
 
 
 function vals=write1DAtt(mat,varargin)
 
+%% parse options
  % look for 'correct' as optional input
  % - set sepcorrect if found
  % - remove from varargin (so other option can be directory)
- opts.sepcorrect=find(cell2mat(cellfun(@(x) ~isempty(strmatch(x,'correct')), varargin,'UniformOutput',0)));
- opts.trialonly=find(cell2mat(cellfun(@(x) ~isempty(strmatch(x,'trialonly')), varargin,'UniformOutput',0)));
- opts.mergecormis=find(cell2mat(cellfun(@(x) ~isempty(strmatch(x,'ctch=crct;slw=wrg')), varargin,'UniformOutput',0)));
+ opts.sepcorrect=testoption('correct',varargin{:});
+ opts.trialonly=testoption('trialonly',varargin{:});
+ opts.mergecormis=testoption('ctch=crct;slw=wrg',varargin{:});
+
  % sep 1d files for the side of target
- opts.sepside=find(cell2mat(cellfun(@(x) ~isempty(strmatch(x,'sepside')), varargin,'UniformOutput',0)));
- % sep what button should have been pushed
- opts.sepdir=find(cell2mat(cellfun(@(x)  ~isempty(strmatch(x,'sepdir')), varargin,'UniformOutput',0)));
+ opts.sepside=testoption('sepside',varargin{:});
+
+ % sep what button (direction) should have been pushed
+ opts.sepdir=testoption('sepdir',varargin{:});
+
+ % sep the types of catches: we want long catch (cue+attend) different than just cue catch
+ opts.longcatch=testoption('longcatch',varargin{:});
 
  % remove opts from varargin (because varargin is used for file naming too)
  % bool their existence (make them T/F flags)
@@ -48,7 +57,12 @@ function vals=write1DAtt(mat,varargin)
  if ~opts.sepcorrect && opts.mergecormis
     error('not sep. correct but merging cor and miss ... why?')
  end
+ if opts.mergecormis && opts.longcatch
+   warning('you want to merge correct and catch and also sep long catches? hope you know what youre doing')
+ end
 
+ %% load file, parse data
+ % mat='/mnt/B/bea_res/Data/Tasks/Attention/Clinical/11340/20141031/mat/Attention_11340_fMRI_20141031.mat';
  a=load(mat);
  
  fieldNames = fieldnames(a.trial(1).timing);
@@ -56,19 +70,23 @@ function vals=write1DAtt(mat,varargin)
  structIdxs= cellfun(@(x) isstruct(a.trial(1).timing.(x)), fieldNames);
  fieldNames=fieldNames(structIdxs);
 
-  % construct filetype
-  ttype={'Popout','Flexible','Habitual','Catch'};
-  types=cell2mat(cellfun(@(x) strmatch(x,ttype), {a.events.type},'UniformOutput',0));
-  side   = ~mod([a.events.trgtpos],2)+1; % 1=left, 2=right
-  drct   = [a.events.crtDir];          % 1=left, 2=right
-  correct= [a.trial.correct];          % 1=correct, 0=wrong, NaN = miss
-
-  %how many trials did we grab?
-  obsTrials = length(a.trial);
-  exptTrials = length(a.events);
-  if(obsTrials ~= exptTrials )
+ % construct filetype
+ ttype={'Popout','Flexible','Habitual','Catch'};
+ types=cell2mat(cellfun(@(x) strmatch(x,ttype), {a.events.type},'UniformOutput',0));
+ side   = ~mod([a.events.trgtpos],2)+1; % 1=left, 2=right
+ drct   = [a.events.crtDir];          % 1=left, 2=right
+ correct= [a.trial.correct];          % 1=correct, 0=wrong, NaN = miss
+ 
+ 
+ %% check file is sane
+ %how many trials did we grab?
+ obsTrials = length(a.trial);
+ exptTrials = length(a.events);
+ if(obsTrials ~= exptTrials )
     warning('*** EXPECTED %d TRIALS BUT CAN ONLY FIND %d! ****',exptTrials,obsTrials);
-  end
+ end
+  
+  %% deal with catch trials
   % We dont want catches to be called that
   % but rather what mini block they are from
   trlmnblk    = ceil(a.trialsPerBlock/3); % trials per mini block
@@ -81,11 +99,26 @@ function vals=write1DAtt(mat,varargin)
   types(catchtrl) = blocktypes(ceil(find(catchtrl)/trlmnblk));
   % note that catchtrl does not encompass all catch trials
   % there are still catchtrials where there was a probe displayed
-
+  
+  % we can get long catches by finding where we have attend and no probe
+  longcatch= cellfun(@(x) x.probe.ideal<0 & x.attend.ideal>0, {a.trial.timing});
+  
+  % where are the long fixations?
+  longfix = find(diff(miniblockno))+1;
+  % if longfix(1) is 25,
+  % a.trial(26).timing.fix.onset - a.trial(25).timing.fix.onset  ~  20sec
+  % a.trial(25).timing.cue.onset - a.trial(25).timing.fix.onset  ~  16.35
+  %
+  % arrayfun(@(i) a.trial(i).timing.cue.onset - a.trial(i).timing.fix.onset, longfix)
+  % 16.3500   15.5400    7.9161   16.8519   16.8300
+  
+  
+  %% name things
   % later we seperate by correct. but we dont want catch trials to lumped with no response
-  % so we'll call the correct value of catch trials something else (3)
-  %  new coding scheme 1      2       3        4
-  re_corrNames = {'Correct','Wrong','TooSlow','Catch'};
+  % so we'll call the correct value of catch trials somfthing else (3)
+  %  new coding scheme 1      2       3        4       5
+  re_corrNames = {'Correct','Wrong','TooSlow','Catch','LongCatch'};
+  
   re_corr = repmat(4,1,length(correct)); % everything is a 4=catch trial
   re_corr(correct==1) =1; % unless it's correct
   re_corr(correct==0) =2; % or wrong
@@ -95,6 +128,11 @@ function vals=write1DAtt(mat,varargin)
   if opts.mergecormis
     re_corr(correct==-1)=2; % or too slow (missed) -- record with wrong
     re_corr(re_corr==4) =1; % pull catch into correct
+  end
+  
+  % sep long catches?
+  if opts.longcatch
+      re_corr(longcatch==1) = 5;
   end
 
 
@@ -190,8 +228,8 @@ function vals=write1DAtt(mat,varargin)
            vals.(savename){b} = [ vals.(savename){b} onsettime ];
 
         end % trials
-      end % fields
-     end % blocks
+    end % fields
+end % blocks
  
 
  %% Save 1D files
@@ -225,3 +263,9 @@ function vals=write1DAtt(mat,varargin)
  end
 
 end %function
+
+% function to check for option(checkstr) in varargin, stolen from write1DWM_v3.m
+% returns 1 if there, 0 if not
+function b=testoption(checkstr,varargin)
+  b=find(cell2mat(cellfun(@(x) ~isempty(strmatch(x,checkstr)), varargin,'UniformOutput',0)));
+end

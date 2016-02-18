@@ -68,9 +68,16 @@ fms=( $( find $sdir -maxdepth 1 -iname 'gre_field_mapping_new_96x90.*' |tail -n2
 
 fm_mag=${fms[0]}
 fm_phase=${fms[1]}
+
 # check we have the right directories (based on dicom count)
-[ $(ls $fm_mag/MR*  |wc -l) -ne 120 ] && echo "fm_mag does not have 120 MRs! ($fm_mag)"   && exit 1
-[ $(ls $fm_phase/MR*|wc -l) -ne  60 ] && echo "fm_mag does not have  60 MRs! ($fm_phase)" && exit 1
+[ ! -r $fm_mag/.fieldmap_magnitude  -a \
+  $(ls $fm_mag/MR*  |wc -l) -ne 120   ] && 
+ echo "fm_mag does not have 120 MRs or .fieldmap_magnitude! ($fm_mag)"   && exit 1
+
+nphase=$(ls $fm_phase/MR* | wc -l|sed 's/ //g')
+[ ! -r $fm_phase/.fieldmap_phase ] && 
+  [  $nphase -ne 60 ] && 
+  echo "fm_mag does not have  60 MRs ($nphase) and no .fieldmap_phase file! ($fm_phase)" && exit 1
 
 set -xe
 

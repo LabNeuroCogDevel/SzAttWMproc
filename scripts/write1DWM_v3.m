@@ -18,6 +18,9 @@ opts.sepchange    =testoption('sepchange'        ,varargin{:});
 opts.trialonly    =testoption('trialonly'        ,varargin{:}); %GM071315 - not currently enabled
 opts.wrongtogether=testoption('wrongtogether'    ,varargin{:}); %WF20151109 - merge more
 opts.noisimodulation=testoption('noisimodulation'    ,varargin{:}); %WF20151111 - no stim_am for cue+isi
+opts.sepmem       =testoption('sepmem'    ,varargin{:}); %WF20151216 - separate memory from cue+isi
+opts.sepdly       =testoption('sepdly'    ,varargin{:}); %WF20151216 - separate delay types (long and short)
+opts.dlymod       =testoption('dlymod'    ,varargin{:}); %WF20151228 - add :1 or :3 for delay onsets (delay modulation)
 
 %opts,
 
@@ -72,6 +75,11 @@ fieldNames=fieldNames(structIdxs);
 %will call "cue"), delay, and probe.  
  
  fieldNames={'fix','cue','delay','probe'};
+
+ if opts.sepmem
+    fieldNames={'fix','cue','mem','delay','probe'};
+ end
+
  
  %Construct filetype
   %changes   = [a.trial.hemi]+1;     
@@ -79,7 +87,9 @@ fieldNames=fieldNames(structIdxs);
   correct  = [a.trial.correct];         % 1=correct, 0=wrong, (-1)=miss, NaN=catch 
   loadn    = [a.trial.load];            % 1=1dot, 3=3dots
   side     = [a.trial.playCue];         % 1=left, 2=right
-  delayType= [a.events.longdelay];      % 0=short, 1=long
+  delayType= 1*[a.events.longdelay];      % 0=short, 1=long
+  delayType(delayType==1)  = 3;
+  delayType(delayType==0)  = 1;
   %drct     = [a.events.crtDir]; GM071315 - can't find this field in WM mat files
 
   %Create alternate coding scheme for possible use later, depending on varargin 
@@ -153,7 +163,14 @@ for i=1:length(fieldNames)
             %if all(strmatch('cue',fieldNames{i}) & ~wrongtogether & ~opts.noisimodulation )
             if strmatch('cue',fieldNames{i}) & ~wrongtogether 
                 isi_dur= a.trial(t).timing.mem.onset - a.trial(t).timing.isi.onset;
-                block_dur= isi_dur + 0.40; %(cue = 0.2s and mem= 0.2s)
+
+                %(cue = 0.2s and mem= 0.2s)
+                block_dur= isi_dur + 0.20;
+                % if we are not separating memory, add that to this "block" (event)'s length
+                if ~opts.sepmem
+                   block_dur = block_dur + 0.20;
+                end
+
                 block_dur= sprintf('%.2f',block_dur);
                 onsettime= [onsettime ':' block_dur]; %format for use with AFNI's -stim_times_AM1 option
             end 
@@ -174,10 +191,20 @@ for i=1:length(fieldNames)
                 %If it's probe, then additionally, "change" will be relevant and must be recorded
                 if strmatch('probe',fieldNames{i})  
                     savename = [savename '_chg' num2str(changes(t)) ]; 
-               %If it's delay, then additionally, "delay" will be relevant and must be recorded
-                elseif  strmatch('delay',fieldNames{i}) 
-                    savename = [savename '_dly' num2str(delayType(t)) ]; 
-                end
+               end
+               % separate delay is its own option
+               %%If it's delay, then additionally, "delay" will be relevant and must be recorded
+               % elseif  strmatch('delay',fieldNames{i}) 
+               %     savename = [savename '_dly' num2str(delayType(t)) ]; 
+               % end
+           end
+
+           if opts.sepdly &  strmatch('delay',fieldNames{i}) & ~wrongtogether
+              savename = [savename '_dly' num2str(delayType(t)) ]; 
+           end
+
+           if opts.dlymod & strmatch('delay',fieldNames{i}) & ~wrongtogether
+                onsettime= [onsettime ':' num2str(delayType(t)) ]; %format for use with AFNI's -stim_times_AM1 option
            end
 
            % Do we want to seperate correct?
