@@ -52,6 +52,7 @@ for mb in /Volumes/Phillips/Raw/MRprojects/P5Sz/multiband/*; do
    # need to make directory if it doesn't exit
    [ ! -d $MB ] && mkdir -p $MB
    continue
+   # always skip this, ?? why
    find $mb -maxdepth 1 -type f | while read mbf; do
     lnto=$MB/$(basename $mbf)
     [ ! -e $lnto ] &&  ln -s $mbf $lnto
@@ -79,7 +80,7 @@ for sd in /Volumes/Phillips/Raw/MRprojects/P5Sz/[^m]*/*; do
       [ $(findmr $f     2>/dev/null|wc -l) -eq \
         $(findmr $sfdir 2>/dev/null|wc -l) ] && continue
 
-      [ ! -d "$sfdir" ] && mkdir $sfdir
+      [ ! -d "$sfdir" ] && mkdir -p $sfdir
       findmr $f | while read mr; do
          lnto=$sfdir/$(basename $mr)
          [ ! -r $mr ] && warn "somethings really weird! cannot read dicom $mr, not linking to $lnto!\n\t abandoning linking all of $f" && break
