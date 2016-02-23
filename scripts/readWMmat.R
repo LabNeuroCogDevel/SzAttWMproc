@@ -37,7 +37,7 @@ writeCuesExample <- function(visit) {
 
 ############### HELPER FUNCTIONS
 
-writeVisits1D <- function(subjid,writefunc=writeCuesExample) {
+writeVisits1D <- function(subjid,writefunc=writeCuesExample,outdir='R1D') {
   cat('#',subjid,'\n')
   # get mat file
   matfile <- findSubjMat(subjid)
@@ -45,7 +45,7 @@ writeVisits1D <- function(subjid,writefunc=writeCuesExample) {
 
   # create output dir 
   cwd<-getwd()
-  goto_mkdir(dirname(matfile), 'R1D')
+  goto_mkdir(dirname(matfile), outdir)
   savedir<-getwd()
 
   # run function provided as input
@@ -57,13 +57,20 @@ writeVisits1D <- function(subjid,writefunc=writeCuesExample) {
   return(savedir)
 }
 
-writeAll1DsWith <-function(writefunc=writeCuesExample){
- mclapply(allSubjs(),writeVisits1D,writefunc=writefunc)
+### run parallel on all subjects
+#     ... is pasted to writeVisit1D
+#     stand in for writefunc= and  outdir=
+writeAll1DsWith <-function(...){
+ lapply(allSubjs(),writeVisits1D,...)
+
+ #mclapply(allSubjs(),writeVisits1D,writefunc,outdir)
 }
 
 # list all subjects
 allSubjs <- function() {
  allsubjs <- grep('1*_20*',dir('/Volumes/Phillips/P5/subj/'),value=T)
+ # did not record isi onsets in 20140911
+ allsubjs <- allsubjs[!allsubjs == '11327_20140911']
 
  # narrow to just those with matfiles
  # ..this means globbing is done twice .. oh well
@@ -79,11 +86,16 @@ allSubjs <- function() {
 # onsets for: fix cue isi mem delay probe finish reponse
 # etrl <-  m$trial['timing',,1]
 onsetTimes <- function(etrl) {
+ eventnames<-dimnames(etrl)[[1]]
+
+ if(! 'isi' %in%  eventnames) {
+    stop("No ISI event name!")
+ }
  # onsets are the second list iteam in timing (first is ideal timing)
  # fix cue isi mem delay probe finish
  onsets <- sapply(etrl[1:7],'[[',2)
  # the names of events is in dimnames of the list
- names(onsets) <- attr(etrl,'dimnames')[[1]][1:7]
+ names(onsets) <- eventnames[1:7]
  # add resonpse
  d<-as.data.frame(t(onsets))
 
