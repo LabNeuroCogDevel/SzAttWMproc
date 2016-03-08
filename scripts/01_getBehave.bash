@@ -4,6 +4,7 @@
 #  -- if we find a subj_visit directory without a 1d directory
 #     run getBehave_single.bash
 
+
 set -e
 
 # go to script directory
@@ -20,6 +21,7 @@ for visitdir in ../subj/*/; do
     [ -d $visitdir/1d ] && continue
    #set id 
     id=$(basename $visitdir)
+    [[ "$id" =~ [0-9]{5}_[0-9]{8} ]] && echo "id ($id) is not expected from '$visitdir'!!" && continue
     #go to field 4 of the google sheet and make sure that equals id
     #then print out the cohort (field 9)
    #cohort=$(awk "(\$4==\"$id\"){print \$9}" "$googleSheet") # 20150106WF - awk skips fields if only whitespace
