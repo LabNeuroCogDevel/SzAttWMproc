@@ -84,14 +84,35 @@ allSubjs <- function() {
 
 ## return a data.frame row of onset times
 # onsets for: fix cue isi mem delay probe finish reponse
-# etrl <-  m$trial['timing',,1]
+# etrl <-  m$trial['timing',,1][[1]]
+#
+#   fix      List,2  
+#   cue      List,2  
+#   isi      List,2  
+#   mem      List,2  
+#   delay    List,2  
+#   probe    List,2  
+#   finish   List,2  
+#   Response 279964.2
+
 onsetTimes <- function(etrl) {
  eventnames<-dimnames(etrl)[[1]]
 
  if(! 'isi' %in%  eventnames) {
     stop("No ISI event name!")
+    warning("No ISI event name! adding .2 to cue")
+    # make isi from cue
+    isi <- etrl[[2]]
+
+    # add .2s from the cue onset to be the start of the isi
+    # this is questionable
+    isi[[2]] <- isi[[2]] + .2
+
+    # add it in
+    etrl <- append(etrl,isi,2)
+    dimnames(etrl)[[1]] <- append(dimnames(etrl)[[1]],'isi',2)
  }
- # onsets are the second list iteam in timing (first is ideal timing)
+ # onsets are the second list item in timing (first is ideal timing)
  # fix cue isi mem delay probe finish
  onsets <- sapply(etrl[1:7],'[[',2)
  # the names of events is in dimnames of the list
@@ -116,6 +137,11 @@ readVisit <- function(mfile) {
    mdf <- m$events[c('playCue','load','changes','block','RT','Correct','longdelay'),,] %>% 
           apply(1,unlist) %>% 
           data.frame
+
+   # error in orig mat files. corrected only in trial struct
+   # so replace with this
+   # -- otherwise we have 2's for all responses insatead of 0 or 1
+   mdf$Correct <- unlist(m$trial['correct',,])
 
    ## get times for each event in a trial
    tdf <- sapply(m$trial['timing',,],onsetTimes) %>% apply(1,unlist) %>% data.frame
