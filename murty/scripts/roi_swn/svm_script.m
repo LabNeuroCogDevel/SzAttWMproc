@@ -5,6 +5,10 @@
 % get subject info (only for useful subjects)
 [subjects,clinical,age,head_motion] = getSubjData();
 
+% svm 2 class, -1 or 1
+clinical(clinical==0)=-1;
+% probably not needed
+
 % define our seeds: 
 %       dlpfc   vc      ppc
 seeds={'RBA46','RBA17','RBA40'};
@@ -52,7 +56,7 @@ labels=repmat(clinical,1,length(seeds))';
 
 
 %% make a model for each of the seed regions
-% label is clinical(1) or not (0)
+% label is clinical(1,n=16) or not (-1,n=22)
 labels=clinical';
 % how many to leave out in each cross validation
 nleftout=8;
@@ -61,6 +65,7 @@ for s=seeds;
  data=zcorrs.(sn);
 
  models.(sn) = pick_svm( labels, data, opts_all, nleftout );
+
 
  % -- if we wanted to pick the best paramters for each seed model:
  %  
@@ -73,6 +78,13 @@ for s=seeds;
  % % add generating params to struct
  % models.(sn).svmopts = svmopts;
  % models.(sn).xvalacc = xvalacc;
+ 
+ % --
+ 
+
+ % for binary: w=SVs'*sv_coef
+ % sign(w'z-rho) == prediction!? doesn't work
+ models.(sn).w=models.(sn).m.SVs' * models.(sn).m.sv_coef;
 end
 
 
@@ -86,5 +98,4 @@ models.RBA46.acc,
 disp(seeds);
 disp(cellfun(@(x) models.(x).acc(1), seeds));
 
-
-
+w=models.RBA46.m.SVs' * models.RBA46.m.sv_coef;

@@ -84,6 +84,13 @@ pattern=working*[12]
         -stim_times_AM1 13 $oneddir/cue_wrong.1D "$dmodel" -stim_label 13 cue_wrong \
 	-stim_times_AM1 14 $oneddir/delay_wrong.1D "$dmodel" -stim_label 14 delay_wrong \
 	-stim_times_AM1 15 $oneddir/probe_wrong.1D "$dmodel" -stim_label 15 probe_wrong \
+	-num_glt 6 \
+	-gltsym 'SYM:.5*cue_ld1_L -.5*cue_ld1_R' -glt_label 1 cue_ld1_LvR \
+	-gltsym 'SYM:.5*cue_ld3_L -.5*cue_ld3_R' -glt_label 2 cue_ld3_LvR \
+	-gltsym 'SYM:.5*delay_ld1_L -.5*delay_ld1_R' -glt_label 3 delay_ld1_LvR \
+	-gltsym 'SYM:.5*delay_ld3_L -.5*delay_ld3_R' -glt_label 4 delay_ld3_LvR \
+	-gltsym 'SYM:.5*probe_ld1_L -.5*probe_ld1_R' -glt_label 5 probe_ld1_LvR \
+	-gltsym 'SYM:.5*probe_ld3_L -.5*probe_ld3_R' -glt_label 6 probe_ld3_LvR \
 	-overwrite \
         -x1D Xmat_${prefix}.x1D -xjpeg dm_$prefix.png \
 	-tout -fitts fitts_${prefix} -errts errts_${prefix} -bucket stats_${prefix}

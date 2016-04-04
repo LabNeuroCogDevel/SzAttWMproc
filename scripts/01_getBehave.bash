@@ -29,5 +29,5 @@ for visitdir in ../subj/*/; do
 #use those variables to run that command
    ./getBehave_single.bash $id $cohort;
 #20150520 MJ - add attention_redo for Att bycorrect_mrg & correct_trialOnly
-   ./redo_attention1D.bash $id;
+   ./Att/redo_attention1D.bash $id;
 done

@@ -162,6 +162,13 @@ for i=1:length(fieldNames)
             % DO NOT add modulation for wrongtogether
             %if all(strmatch('cue',fieldNames{i}) & ~wrongtogether & ~opts.noisimodulation )
             if strmatch('cue',fieldNames{i}) & ~wrongtogether 
+
+                % this only happens for scott
+                if ~isfield(a.trial(t).timing,'isi')
+                    a.trial(t).timing.isi.onset=a.trial(t).timing.cue.onset+.2;
+                    warning('no isi onset for this trial!!')
+                end
+
                 isi_dur= a.trial(t).timing.mem.onset - a.trial(t).timing.isi.onset;
 
                 %(cue = 0.2s and mem= 0.2s)
@@ -254,6 +261,8 @@ oneDfolder=[];
 if(~isempty(varargin) && ischar(varargin{1}))
      oneDfolder=varargin{1};
      mkdir(oneDfolder);
+else
+   oneDfolder='./';
 end
 
 %%% %Write dummy 1D files in case some conditions have no events (these get
