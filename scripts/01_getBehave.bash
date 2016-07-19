@@ -18,16 +18,18 @@ googleSheet="SubjInfoGoogleSheet.txt"
 #  visitdir is your luna lab id + scan date
 for visitdir in ../subj/*/; do
    #if a 1d file exists for each subject continue on
-    [ -d $visitdir/1d ] && continue
+   [ -d $visitdir/1d ] && continue
    #set id 
-    id=$(basename $visitdir)
-    [[ "$id" =~ [0-9]{5}_[0-9]{8} ]] && echo "id ($id) is not expected from '$visitdir'!!" && continue
-    #go to field 4 of the google sheet and make sure that equals id
-    #then print out the cohort (field 9)
+   id=$(basename $visitdir)
+   [[ ! "$id" =~ [0-9]{5}_[0-9]{8} ]] && echo "id ($id) is not expected from '$visitdir'!!" && continue
+   #go to field 4 of the google sheet and make sure that equals id
+   #then print out the cohort (field 9)
    #cohort=$(awk "(\$4==\"$id\"){print \$9}" "$googleSheet") # 20150106WF - awk skips fields if only whitespace
    cohort=$(perl -F"\t" -slane "print \$F[8] if(\$F[3]==\"$id\")" "$googleSheet" )
-#use those variables to run that command
+   [[ ! $cohort =~ Control|Clinical ]] && echo "$id cohort '$cohort' is not Control or Clinical! skipping" && continue
+   #use those variables to run that command
    ./getBehave_single.bash $id $cohort;
-#20150520 MJ - add attention_redo for Att bycorrect_mrg & correct_trialOnly
+
+   #20150520 MJ - add attention_redo for Att bycorrect_mrg & correct_trialOnly
    ./Att/redo_attention1D.bash $id;
 done
