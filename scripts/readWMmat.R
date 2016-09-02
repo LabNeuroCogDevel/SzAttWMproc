@@ -196,6 +196,54 @@ linePerblock <- function(d,colname=1,nblocks=2,dur=NULL) {
  )
 }
 
+# set durations
+setDurations <- function(visit) {
+  # make sure visit has all the columns we need
+  needcols<-c('cue','mem','delay','probe','response','finish')
+  if(!all(needcols %in% names(visit))) stop('setdurations: cannot find all needed columns in data frame',neecols)
+
+  # duration of cue is when mem started minus when cue started
+  # this includes isi
+  # otherwise duration is .2
+  # e.g.    
+  #   round(visit$isi - visit$cue, 2) == .2
+  # CUE DURATION CONSIDERED HARMFUL 20160902
+  #   -- if used without mem, mem goes into baseline (which gives bad brain data)
+  #      but there is no way to sep. cue from mem. so why use just cue (or just mem)
+  #      COMMENTED out so will see errors if it's used
+  #visit$cuedur <- visit$mem - visit$cue
+
+  # want cue + mem b/c they cannot be separated 
+  # add .2 directly (mem duration) instead of delay-cue b/c even if catch (delay=-1) we still have .2 before end of trial
+  visit$cuememdur <- visit$cuedur + .2 
+
+  # dly duration is onset of probe - start of delay
+  visit$dlydur <- visit$probe - visit$delay
+
+  # set load type to low or high
+  # b/c we have mix of load 3 and load 4, both of which are high 
+  visit$ldtype <- NA
+  visit$ldtype[visit$load==1]          <- 'low'
+  visit$ldtype[visit$load %in% c(3,4)] <- 'high'
+  
+  #probe wrong (depend on RT, no resp)
+  visit$probedur <- ifelse(visit$response>0, 
+                           visit$response - visit$probe,
+                           visit$finish   - visit$probe )
+  
+  #BONUS column: correct or catch 
+  # correct is NaN for catch trials. catchType is NaN for non-catch trials
+  # we want correct or catch, either can be true
+  visit$CorrectOrCatch <- visit$Correct==1 | is.nan(visit$Correct)
+
+  # all catches do not have probe (==-1) and corrects should be NaN
+  # warn if this is not the case
+  if( all(is.nan(visit$Correct) == (visit$probe==-1)) != T ) warning('catch trials are funky, corrects==nan are not all probe==-1 ?!')
+
+
+ return(visit)
+}
+
 
 # write a 1D file given:
 # - dataframe 
@@ -203,8 +251,21 @@ linePerblock <- function(d,colname=1,nblocks=2,dur=NULL) {
 # - and a file name
 # if fname is null, will not write to file
 
-save1D <- function(d,colname=1,fname="1.1D",dur=NULL){
+save1D <- function(d,colname=1,fname=NULL,dur=NULL){
+
+ ## check that we have the colname and durname in the datarfame passed
+ if(!colname %in% names(d)) stop('cannot find ',colname, ' in dataframe')
+ if(!is.null(dur) && ! dur %in% names(d)) stop('cannot find ', dur, ' in dataframe')
+
+ ## remove NA and -1
+ badidx <- is.na(d[,colname]) | d[,colname]<0                        # colname (onsettime)
+ if(!is.null(dur)) { badidx <- badidx | is.na(d[,dur]) | d[,dur]<0 } # duration if specified
+ d <- d[!badidx,]
+
+ # where to write stimetimes (filename or stdout)
  if(!is.null(fname)) sink(fname)
+
+
  d %>% linePerblock(colname,dur=dur) 
  cat("\n")
  if(!is.null(fname)) sink()
