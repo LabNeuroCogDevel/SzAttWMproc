@@ -210,7 +210,7 @@ setDurations <- function(visit) {
   # CUE DURATION CONSIDERED HARMFUL 20160902
   #   -- if used without mem, mem goes into baseline (which gives bad brain data)
   #      but there is no way to sep. cue from mem. so why use just cue (or just mem)
-  #      COMMENTED out so will see errors if it's used
+  #      COMMENTED out of dataframe so will see errors if it's used
   #visit$cuedur <- visit$mem - visit$cue
   cuedur <- visit$mem - visit$cue
 
@@ -220,6 +220,20 @@ setDurations <- function(visit) {
 
   # dly duration is onset of probe - start of delay
   visit$dlydur <- visit$probe - visit$delay
+
+  ## sometimes  probe is -1 but we have delay
+  # so add hard delay duration based on if long or short
+  shortdlydur <- 1
+  longdlydur  <- 3
+
+  # only want to change the probe catches. otherwise use more precious timing
+  pcatch.idx <- visit$catchType == 'probe'
+  pcatch.dlydur <- ifelse(visit$longdelay[pcatch.idx], shortdlydur,longdlydur )
+  visit$dlydur[pcatch.idx] <- pcatch.dlydur
+
+  # check that we corrected all the dlydur 
+  if(any(visit$dlydur<0)) warning('some delay durations are negative! are probe catches confused!')
+
 
   # set load type to low or high
   # b/c we have mix of load 3 and load 4, both of which are high 
