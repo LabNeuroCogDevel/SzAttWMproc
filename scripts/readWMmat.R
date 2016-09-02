@@ -164,12 +164,16 @@ readVisit <- function(mfile) {
    dlycatchidx<-visit$catchType=='delay'
    visit[dlycatchidx,'finish'] <- visit$mem[dlycatchidx] + .02
 
+   # if we had no probe, ended at delay. but delay is short or long.
+   # so add hard delay duration based on if long or short
+   shortdlydur <- 1
+   longdlydur  <- 3
    # probe catch
    # saw either a 1 or 3 second duration delay
    # add to delay onset
    prbbatchidx<-visit$catchType=='probe'
    visit[prbbatchidx,'finish'] <- visit$delay[prbbatchidx] +
-                                  ifelse(visit$longdelay[prbbatchidx]==1,1,3)
+                                  ifelse(visit$longdelay[prbbatchidx]==1,longdlydur,shortdlydur)
 
    return(visit)
 }
@@ -219,19 +223,13 @@ setDurations <- function(visit) {
   visit$cuememdur <- cuedur + .2 
 
   # dly duration is onset of probe - start of delay
-  visit$dlydur <- visit$probe - visit$delay
-
-  ## sometimes  probe is -1 but we have delay
-  # so add hard delay duration based on if long or short
-  shortdlydur <- 1
-  longdlydur  <- 3
-
-  # only want to change the probe catches. otherwise use more precious timing
-  pcatch.idx <- visit$catchType == 'probe'
-  pcatch.dlydur <- ifelse(visit$longdelay[pcatch.idx], shortdlydur,longdlydur )
-  visit$dlydur[pcatch.idx] <- pcatch.dlydur
+  # unless we never had a probe (probe catch). then use finish (whcih was calcuated with hardcoded delay times elsewhere)
+  ispcatch <- visit$catchType == 'probe'
+  dlyend <- ifelse(ispcatch,visit$finish,visit$probe)
+  visit$dlydur <- dlyend - visit$delay
 
   # check that we corrected all the dlydur 
+  if(any(visit$longdelay==0&visit$dlydur>2)|any(visit$longdelay==1&visit$dlydur<2) ) warning('longdelay and dlydur disagree')
   if(any(visit$dlydur<0)) warning('some delay durations are negative! are probe catches confused!')
 
 
