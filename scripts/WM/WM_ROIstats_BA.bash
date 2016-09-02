@@ -13,8 +13,8 @@ for d in 1*/; do
 
   
 
-	3dROIstats -quiet -mask ${roi_path}/${reg}+tlrc.HEAD ${data}/${d}/contrasts/WM/stats_WM_correct_load_wrongtogether_dlymod+tlrc.[1]>>cue_ld1_${reg}.txt
-	3dROIstats -quiet -mask ${roi_path}/${reg}+tlrc.HEAD ${data}/${d}/contrasts/WM/stats_WM_correct_load_wrongtogether_dlymod+tlrc.[3]>>cue_ld3_${reg}.txt
+	3dROIstats -mask ${roi_path}/${reg}+tlrc.HEAD ${data}/${d}/contrasts/WM/stats_WM_correct_load_wrongtogether_dlymod+tlrc.[1] >>cue_ld1_${reg}.txt
+	3dROIstats -mask ${roi_path}/${reg}+tlrc.HEAD ${data}/${d}/contrasts/WM/stats_WM_correct_load_wrongtogether_dlymod+tlrc.[3]>>cue_ld3_${reg}.txt
 	3dROIstats -quiet -mask ${roi_path}/${reg}+tlrc.HEAD ${data}/${d}/contrasts/WM/stats_WM_correct_load_wrongtogether_dlymod+tlrc.[5]>>delay_ld1_${reg}.txt
 	3dROIstats -quiet -mask ${roi_path}/${reg}+tlrc.HEAD ${data}/${d}/contrasts/WM/stats_WM_correct_load_wrongtogether_dlymod+tlrc.[7]>>delay_ld3_${reg}.txt
 	3dROIstats -quiet -mask ${roi_path}/${reg}+tlrc.HEAD ${data}/${d}/contrasts/WM/stats_WM_correct_load_wrongtogether_dlymod+tlrc.[9]>>probe_ld1_${reg}.txt

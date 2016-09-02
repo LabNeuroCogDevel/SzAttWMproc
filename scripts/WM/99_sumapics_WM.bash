@@ -7,7 +7,7 @@ function DriveAFNI {
    sleep 1;
 }
 
-pval=01
+pval=30
 
 #what key shows only that hemisphere
 # for LH we want to disable the RH
@@ -16,9 +16,9 @@ RH=']'
 
 stdbrain=/Users/mariaj/abin/standard
 # where to get contrasts
-dsetdir=$scriptdir/../group_analyses/WM/ttest_WM_bycorrect_load_wrongtogether_dlymod_2016-03-03/
+dsetdir=/Volumes/Phillips/P5/group_analyses/WM/ttest_WM_bycorrect_load_wrongtogether_dlymod_2016-04-04/
 # where to save images
-imgdir=$scriptdir/../group_analyses/WM/ttest_WM_bycorrect_load_wrongtogether_dlymod_2016-03-03/imgs
+imgdir=/Volumes/Phillips/P5/group_analyses/WM/ttest_WM_bycorrect_load_wrongtogether_dlymod_2016-04-04/imgs
 [ ! -d "$imgdir" ] && mkdir $imgdir
 
 # where is the mni template brain surf and nii
@@ -95,7 +95,7 @@ for task in delay_ld1 delay_ld3; do
  sleep 1
 
 
- for msb in 0; do
+ for msb in 2 4; do
    # t-stat sub brick is one above mean/contrast brick
    tsb=$((($msb+1)))
 

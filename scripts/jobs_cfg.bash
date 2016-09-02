@@ -12,7 +12,7 @@ function waitForJobs {
   [ -n "$jobscnfg" -a -r "$jobscnfg" ] && source "$jobscnfg";
 
   njobs=$(jobs -p |wc -l)
-  i=1;
+  local i=1;
   while [[ "$njobs" -ge "$MAXJOBS" ]]; do
     [ -n "$jobscnfg" -a -r "$jobscnfg" ] && source "$jobscnfg";
     echo "$i $(date +%F-%H:%M) njobs >= MAXJOBS (${njobs// }>=$MAXJOBS); waiting ${SLEEPTIME}s "

@@ -212,10 +212,11 @@ setDurations <- function(visit) {
   #      but there is no way to sep. cue from mem. so why use just cue (or just mem)
   #      COMMENTED out so will see errors if it's used
   #visit$cuedur <- visit$mem - visit$cue
+  cuedur <- visit$mem - visit$cue
 
   # want cue + mem b/c they cannot be separated 
   # add .2 directly (mem duration) instead of delay-cue b/c even if catch (delay=-1) we still have .2 before end of trial
-  visit$cuememdur <- visit$cuedur + .2 
+  visit$cuememdur <- cuedur + .2 
 
   # dly duration is onset of probe - start of delay
   visit$dlydur <- visit$probe - visit$delay

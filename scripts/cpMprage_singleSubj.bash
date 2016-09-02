@@ -37,6 +37,7 @@ if [ -z "$file" ]; then
   sleep 120 # enough time for Dimon to complete
 
   # maybe we didn't way long enough
+  # then wait for the whole thing
   if [ -z "$(findmprage)" ]; then
      wait 
      file="$(findmprage)"
@@ -53,7 +54,7 @@ rsync -vhi $file $uploadpath
 
 # write a file to says we transfered this mprage
 # this will be useful for any automated scripts (they'll know to skip running this)
-echo  "$uploadpath $(date +%F)" > $(dirname $file)/$flagfile
+echo  "$uploadpath $(date +%F)" |tee $(dirname $file)/$flagfile
 
 # wait for preprocessMprage to finish before trying anything else
 wait

@@ -37,7 +37,7 @@ writeCuesExample <- function(visit) {
 
 ############### HELPER FUNCTIONS
 
-writeVisits1D <- function(subjid,writefunc=writeCuesExample,outdir='lateral') {
+writeVisits1D <- function(subjid,writefunc=writeCuesExample,outdir='correct_load_wrongtogether_dlymod') {
   cat('#',subjid,'\n')
   # get mat file
   matfile <- findSubjMat(subjid)
@@ -68,7 +68,7 @@ writeAll1DsWith <-function(...){
 
 # list all subjects
 allSubjs <- function() {
- allsubjs <- grep('1*_20*',dir('/Volumes/Phillips/P5/subj/'),value=T)
+ allsubjs <- grep('1*_20*',dir('//10.145.64.109/Phillips/P5/subj/'),value=T)
  # did not record isi onsets in 20140911
  allsubjs <- allsubjs[!allsubjs == '11327_20140911']
 
@@ -193,7 +193,7 @@ save1D <- function(d,colname=1,fname="1.1D",dur=NULL){
 # load a subjecs mat file
 findSubjMat <- function(subjid) {
   # find mat file
-  filepat <- sprintf('/Volumes/Phillips/P5/subj/%s/1d/WM/WorkingMemory_*_fMRI_*.mat', subjid )
+  filepat <- sprintf('//10.145.64.109/Phillips/P5/subj/%s/1d/WM/WorkingMemory_*_fMRI_*.mat', subjid )
   matfile <- Sys.glob(filepat)
   if(length(matfile)!=1){ warning(sprintf('not exactly 1 %s',filepat)); return(NA)}
   matfile <- matfile[1]

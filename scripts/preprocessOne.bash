@@ -63,8 +63,8 @@ refimg=$(find  $sdir/MB/ -maxdepth 1 -iname "*$runname*ref.hdr"|tail -n1)
 # first mag then phase
 # -fm_magnitude "/Volumes/Phillips/P5/subj/$s2/gre_field_mapping_new_96x90.13/MR*" 
 # -fm_phase "/Volumes/Phillips/P5/subj/$s2/gre_field_mapping_new_96x90.14/MR*" 
-fms=( $( find $sdir -maxdepth 1 -iname 'gre_field_mapping_new_96x90.*' |tail -n2  ) )
-[ ${#fms[@]} -ne 2 ] && echo "cannot find mag and phase in $sdir/gre_field_mapping_new_96x90.*" && exit 1
+fms=( $( find $sdir -maxdepth 1 -iname 'gre_field_mapping_new_9[06]x9[60].*' |tail -n2  ) )
+[ ${#fms[@]} -ne 2 ] && echo "cannot find mag and phase in $sdir/gre_field_mapping_new_9[06]x9[60].*" && exit 1
 
 fm_mag=${fms[0]}
 fm_phase=${fms[1]}

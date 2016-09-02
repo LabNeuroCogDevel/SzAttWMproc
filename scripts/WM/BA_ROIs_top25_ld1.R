@@ -4,34 +4,42 @@ library(plyr)
 library(ggplot2)
 library(dplyr)
 
-delay_ld1<-read.delim(file="/Users/mariaj/Dropbox/delay_ld1_BA_spheres_t25.txt",header=F)
-delay_ld1<-delay_ld1/100
-fornames<-read.delim(file="/Users/mariaj/Dropbox/cue_ld1_BA_spheres.txt",header=F)
+delay_ld1<-read.delim(file="/Volumes/Phillips/P5/scripts/txt/delay_ld1_final_BA_spheres_max.txt",header=F)
+fornames<-read.delim(file="/Volumes/Phillips/P5/scripts/txt/20160801_subj_list.txt",header=F)
 delay_ld1.1<-cbind(fornames$V1,delay_ld1)
-colnames(delay_ld1.1)<-c("ID","LBA17_delay_ld1","LBA40_delay_ld1","LBA46_delay_ld1","LBA9_delay_ld1","RBA17_delay_ld1","RBA40_delay_ld1","RBA46_delay_ld1","RBA9_delay_ld1")
+colnames(delay_ld1.1)<-c("ID","LCING_delay_ld1","LDLPFC_BA46_delay_ld1","LDLPFC_BA9_delay_ld1","LFEF_delay_ld1","LIPL_delay_ld1","LVC_delay_ld1","LINS_delay_ld1","RCING_delay_ld1","RDLPFC_BA46_delay_ld1","RDLPFC_BA9_delay_ld1","RFEF_delay_ld1","RIPL_delay_ld1","RVC_delay_ld1","RINS_delay_ld1")
 
-#take out the crappy controls
+#dont need these right now -20160801
+#bad_subs<-match(c("11333_20141017","11369_20150519"),delay_ld1.1$ID)
+#delay_ld1.2<-delay_ld1.1[-bad_subs,]
+#write this table to Dropbox for ROI_mean_side_load.R)
+#write.table(delay_ld1.2,file="/Users/mariaj/Dropbox/delay_ld1_BA_spheres_top25.txt")
 
-
-delay_ld1.2<-delay_ld1.1[c(1:25,27:30,32:43),]
 
 #read in google doc
-subj<-read.delim(file="/Users/mariaj/Dropbox/20160303_behavior_data_demos.txt")
+subj<-read.delim(file="/Volumes/Phillips/P5/scripts/SubjInfoGoogleSheet_wdx.txt")
 
 
-data_ROIs<-merge(delay_ld1.2,subj,by.x="ID",by.y="subjid")
+data_ROIs<-merge(delay_ld1.1,subj,by.x="ID",by.y="MRID")
+
+#right now lets just do our DLPFC, PPC, and VC subset
+keep = match(c("ID","LDLPFC_BA9_delay_ld1","LIPL_delay_ld1","LVC_delay_ld1","RDLPFC_BA9_delay_ld1","RIPL_delay_ld1","RVC_delay_ld1","Cohort","confirmed_initial_dx1","meds","age","sex"), colnames(data_ROIs))
+
+
+data_ROIs.1<-data_ROIs[,keep]
+
 
 #create bilateral ROIs
-data_ROIs$BBA17_delay_ld1<-(data_ROIs$LBA17_delay_ld1+data_ROIs$RBA17_delay_ld1)/2
-data_ROIs$BBA40_delay_ld1<-(data_ROIs$LBA40_delay_ld1+data_ROIs$RBA40_delay_ld1)/2
+#data_ROIs$BBA17_delay_ld1<-(data_ROIs$LBA17_delay_ld1+data_ROIs$RBA17_delay_ld1)/2
+#data_ROIs$BBA40_delay_ld1<-(data_ROIs$LBA40_delay_ld1+data_ROIs$RBA40_delay_ld1)/2
 #data_ROIs$BBA46_delay_ld1<-(data_ROIs$LBA46_delay_ld1+data_ROIs$RBA46_delay_ld1)/2
-data_ROIs$BBA9_delay_ld1<-(data_ROIs$LBA9_delay_ld1+data_ROIs$RBA9_delay_ld1)/2
+#data_ROIs$BBA9_delay_ld1<-(data_ROIs$LBA9_delay_ld1+data_ROIs$RBA9_delay_ld1)/2
 
-write.table(data_ROIs[,c(1,22:24)],file="/Volumes/Phillips/P5/scripts/20160307_BLROIS_ld1.txt")
+#write.table(data_ROIs[,c(1,22:24)],file="/Volumes/Phillips/P5/scripts/20160307_BLROIS_ld1.txt")
 
+table(data_ROIs$Cohort)
 
-
-for (i in 2:9)
+for (i in 2:7)
   
 {
   
@@ -40,34 +48,49 @@ for (i in 2:9)
 }
 
 #compare only scz to controls
-data_ROIs_dx<-data_ROIs[data_ROIs$confirmed_initial_dx=="1" | data_ROIs$confirmed_initial_dx=="3", ]
+data_ROIs_dx<-data_ROIs[data_ROIs$confirmed_initial_dx1=="1" | data_ROIs$confirmed_initial_dx1=="3", ]
 
-for (i in 2:9)
+for (i in 2:7)
   
 {
   
-  model_beh<-glm(data_ROIs_dx[[i]]~as.factor(data_ROIs_dx$confirmed_initial_dx),data=data_ROIs_dx)
+  model_beh<-glm(data_ROIs_dx[[i]]~as.factor(data_ROIs_dx$confirmed_initial_dx1),data=data_ROIs_dx)
   print((summary(model_beh)$coefficients[2,4]))
 }
+
+
+#Left ROI by group interaction
+#NS
+WM<-data_ROIs.1[,c(1:4,8)]
+WM2 <- melt(WM, id.vars=c("ID","Cohort"))
+WM_aov1<-aov(value~Cohort*variable+Error(ID/variable),data=WM2)
+summary(WM_aov1)
+
+#Right ROI by group interaction
+#NS
+WM<-data_ROIs.1[,c(1,5:8)]
+WM2 <- melt(WM, id.vars=c("ID","Cohort"))
+WM_aov1<-aov(value~Cohort*variable+Error(ID/variable),data=WM2)
+summary(WM_aov1)
 
 
 
 data_ROIs_cont<-data_ROIs[data_ROIs$Cohort=="Control",]
 cor.test(data_ROIs_cont$age,data_ROIs_cont$RBA46_delay_ld1)
 cor.test(data_ROIs_cont$age,data_ROIs_cont$RBA9_delay_ld1)
-cor.test(data_ROIs_cont$age,data_ROIs_cont$ld1_per_cor)
+#cor.test(data_ROIs_cont$age,data_ROIs_cont$ld1_per_cor)
 
 data_ROIs_pat<-data_ROIs[data_ROIs$Cohort=="Clinical",]
 cor.test(data_ROIs_pat$age,data_ROIs_pat$RBA46_delay_ld1)
 cor.test(data_ROIs_pat$age,data_ROIs_pat$RBA9_delay_ld1)
-cor.test(data_ROIs_pat$age,data_ROIs_pat$ld1_per_cor)
+#cor.test(data_ROIs_pat$age,data_ROIs_pat$ld1_per_cor)
 
 #remove the 35 year old w/ really low activation
 data_ROIs_pat.2<-data_ROIs_pat[c(1:17,19:25),]
 
 cor.test(data_ROIs_pat.2$age,data_ROIs_pat.2$RBA46_delay_ld1)
 cor.test(data_ROIs_pat.2$age,data_ROIs_pat.2$RBA9_delay_ld1)
-cor.test(data_ROIs_pat.2$age,data_ROIs_pat.2$ld1_per_cor)
+#cor.test(data_ROIs_pat.2$age,data_ROIs_pat.2$ld1_per_cor)
 
 
 pdf(paste("Ld1_percor_age_relationships.pdf"))

@@ -1,6 +1,9 @@
 ##
 # 
 ##
+warn() {
+   echo $@ >&2
+}
 
 # lookup meg id from subject list
 # subject to change based on orgnization of google doc
@@ -10,13 +13,19 @@
 function getMEGID {
   scriptdir=$(cd $(dirname ${BASH_SOURCE[0]}); pwd)
   #scriptdir="$(cd $(dirname $0); pwd)"
-  
+   
+
 
   id=$1
-  [ -z "$id" ] && echo "no id given to getMEGID!" && exit 1
+  if [[ -z $id || \
+         ! $id =~ ([0-9][0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]) ]]; then
+   warn "'$id': bad ID" 
+   return 1
+  fi
+  id=$BASH_REMATCH
 
   googleSheet="$scriptdir/SubjInfoGoogleSheet.txt"
-  [ ! -r $googleSheet ] && echo "cannot find/open $googleSheet!" && exit 1
+  [ ! -r $googleSheet ] && warn "cannot find/open $googleSheet!" && return 1
 
 
   #MEGID=$(curl -s "$url/export?format=tsv"| awk "(\$4==\"$id\"){print \$2}")
@@ -30,16 +39,20 @@ function getMEGID {
   # MEGDATE MEGID MRDATE   MRID  Task_Order_CB  WM_Response_CB Attention_Subtask_Order LunaCB   Cohort      Counts
   MEGIDidx=$(sed 1q $googleSheet | tr '	' '\n' | perl -lne 'print $.-1 and exit if /MEGID/')
      IDidx=$(sed 1q $googleSheet | tr '	' '\n' | perl -lne 'print $.-1 and exit if /MRID/')
-  [ -z "$MEGIDidx" -o -z "$IDidx" ] && echo "cannot find MEGID or MRID in $googleSheet, something is wrong!" >&2 && exit 1
+
+  if [ -z "$MEGIDidx" -o -z "$IDidx" ]; then
+    warn "cannot find MEGID or MRID in $googleSheet, something is wrong!" 
+    return 1
+  fi
 
   MEGID=$(perl -F"\t" -slane "print \$F[$MEGIDidx] if(\$F[$IDidx]==\"$id\")" "$googleSheet" )
 
 
   ## check 
   if [[ -z "$MEGID" || ! $MEGID =~ [0-9]{4} ]]; then 
-     echo "cannot find $id in sheet or '$MEGID' not as expected" >&2
-     echo "see $googleSheet (pulled from google in 00_fetchData.bash)" >&2 
-     exit 1
+     warn "cannot find $id in sheet or '$MEGID' not as expected" 
+     warn "see $googleSheet (pulled from google in 00_fetchData.bash)" 
+     return 1
   fi
 
 
