@@ -7,12 +7,13 @@ library(car)
 library(tidyr)
 
 
-source("//10.145.64.109/Phillips/P5/scripts/WM/graphing_functions.R")
+source("../WM/graphing_functions.R")
 #source("/Volumes/Phillips/P5/scripts/WM/graphing_functions.R")
+#setwd("C:/Users/Dhruv/Documents/GitHub/SzAttWMproc/scripts/Att")
 
 #Flexible Analysis-Power ROIs
 #Flexible<-read.delim(file="/Volumes/Phillips/P5/scripts/txt/Flexible_powersROIs_mean.txt",header=T)
-Flexible<-read.delim(file="//10.145.64.109/Phillips/P5/scripts/txt/Flexible_powersROIs_mean.txt",header=T)
+Flexible<-read.delim(file="../txt/Flexible_powersROIs_mean.txt",header=T)
 Flexible.1<<-Flexible[-grep("File",Flexible$File),]
 
 Flexible.1$File<-gsub("/Volumes/Phillips/P5/subj/","",Flexible.1$File)
