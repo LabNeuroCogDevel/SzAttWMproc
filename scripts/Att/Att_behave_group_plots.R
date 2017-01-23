@@ -10,17 +10,17 @@ today<-Sys.Date()
 todayf<-format(today,format="%Y%m%d")
 #load all the Attention behav files (they've already been run through matlab)
 #copy them over from skynet
-#Attfiles <- Sys.glob('//10.145.64.109/Phillips/P5/scripts/csv/Attention*')
-Attfiles <- Sys.glob('/Volumes/Phillips/P5/scripts/csv/Attention*')
+Attfiles <- Sys.glob('C:/Users/Dhruv/Documents/GitHub/SzAttWMproc/scripts/csv/Attention*')
+#Attfiles <- Sys.glob('/Volumes/Phillips/P5/scripts/csv/Attention*')
 
 
-#source("//10.145.64.109/Phillips/P5/scripts/WM/graphing_functions.R")
-source("/Volumes/Phillips/P5/scripts/WM/graphing_functions.R")
+source("C:/Users/Dhruv/Documents/GitHub/SzAttWMproc/scripts/WM/graphing_functions.R")
+#source("/Volumes/Phillips/P5/scripts/WM/graphing_functions.R")
 
 
 #for just one individual
 #filename = ('/Volumes/Phillips/P5/scripts/csv/Attention_10843')
-prefix= '/Volumes/Phillips/P5/scripts/csv/Attention_'
+prefix= 'C:/Users/Dhruv/Documents/GitHub/SzAttWMproc/scripts/csv/Attention_'
 #filename = ('//10.145.64.109/Phillips/P5/scripts/csv/Attention_10843')
 #prefix= '//10.145.64.109/Phillips/P5/scripts/csv/Attention_'
 
@@ -94,14 +94,14 @@ setwd("//10.145.64.109/Phillips/P5/group_analyses/Att/behave")
 #20161010-take out subjects that did not complete all of task runs: 11330_20141002, 11364_20150317, 11553_20160620
 #201 take out subjects that did not complete task runs and sub that did not respond to a bunch of stim: 11454_20151019 
 
-bad_subj<-match(c("11330_20141002","11364_20150317","11454_20151019","11553_20160620"),data_table$subjid)
+bad_subj<-match(c("11330_20141002","11364_20150317","11454_20151019","11553_20160620","11583_20161209"),data_table$subjid)
 
 
-data_table1<-data_table[-bad_subj,]
+data_table1<-data_table[-bad_subj, ]
 
 
 #read in google doc
-subj<-read.delim(file="//10.145.64.109/Phillips/P5/scripts/SubjInfoGoogleSheet_wdx.txt",header=T)
+subj<-read.delim(file="C:/Users/Dhruv/Documents/GitHub/SzAttWMproc/scripts/SubjInfoGoogleSheet_att_wdx.txt",header=T)
 #match the google doc with existing behave files because not all subs completed the tasks
 
 
@@ -114,18 +114,27 @@ table(data_table2$confirmed_initial_dx1)
 
 #ttest to see if patients & controls are sig different on measures
 #can change coefficient to 2,3 for t-vlaue, 2,4 for p-value
+control <- data_table2[ which(data_table2$Cohort=='Control'),]
+clinical <- data_table2[ which(data_table2$Cohort=='Clinical'),]
+
 pval<- matrix(NA,ncol=1,nrow=9)
 for (i in 2:9)
   
 {
-  
-  model_beh<-glm(data_table2[[i]]~as.factor(data_table2$Cohort),data=data_table2)
-  print((summary(model_beh)$coefficients[2,4]))
+  i=9
+  t.test(data_table2[,c(i)]~Cohort,data=data_table2)
+  sd<-sd(clinical[,c(i)])
+  print(sd)
+  sd<-sd(control[,c(i)])
+  print(sd)
+  #model_beh<-glm(data_table2[[i]]~as.factor(data_table2$Cohort),data=data_table2)
+  #print((summary(model_beh)$coefficients[2,4]))
 }
 
 #anova for accuracy w/ condition by cohort
 #10/09/2016- no main effect of group, no group*condition interaction
-Att<-data_table2[,c(1,3:5,17)]
+#1/13/17: main effect of condition, p=4.13E-5
+Att<-data_table2[ ,c(1,3:5,17)]
 Att2 <- melt(Att, id.vars=c("subjid","Cohort"))
 Att_aov1<-aov(value~Cohort*variable+Error(subjid/variable),data=Att2)
 summary(Att_aov1)
@@ -139,35 +148,45 @@ summary(Att_aov1)
 
 
 #anova for RTw/ condition by cohort
-#20161006-
+#1/13/17: no main effects, no interactions
 Att<-data_table2[,c(1,7:9,17)]
 Att2 <- melt(Att, id.vars=c("subjid","Cohort"))
 Att_aov1<-aov(value~Cohort*variable+Error(subjid/variable),data=Att2)
 summary(Att_aov1)
 
 
-
-#anova for RTw/ condition by cohort
+#anova for RTw/ condition by diagnosis
 #20161006-
 Att<-data_table2[,c(1,7:9,19)]
 Att2 <- melt(Att, id.vars=c("subjid","confirmed_initial_dx1"))
 Att_aov1<-aov(value~confirmed_initial_dx1*variable+Error(subjid/variable),data=Att2)
 summary(Att_aov1)
 
-
-pval<- matrix(NA,ncol=1,nrow=9)
-for (i in 6:9)
-  
+#age correlations whole group
+for(i in 2:9)
 {
-  
-  model_beh<-glm(data_table2[[i]]~as.factor(data_table2$Cohort),data=data_table2)
-  print((summary(model_beh)$coefficients[2,4]))
+  cor <- cor.test(data_table2$age,data_table2[,c(i)])
+  print(cor$estimate)
+}
+
+#age correlations within clinical
+for(i in 2:9)
+{
+  cor <- cor.test(clinical$age,clinical[,c(i)])
+  print(cor$p.value)
+}
+
+#age correlations within controls
+for(i in 2:9)
+{
+  cor <- cor.test(control$age,control[,c(i)])
+  print(cor$p.value)
 }
 
 
-
 #keep %corr group
-keep = match(c("subjid","per_cor","Cohort","confirmed_initial_dx1"), colnames(data_table2))
+#keep = match(c("subjid","per_cor","Cohort","confirmed_initial_dx1"), colnames(data_table2))
+keep = match(c("subjid","per_cor","Cohort"), colnames(data_table2))
 percor_plot<-data_table2[,keep]
 
 colnames(percor_plot)[colnames(percor_plot)=="per_cor"]<-"value"
@@ -232,7 +251,9 @@ print(p.grp)
 dev.off()
 
 #keep RT
-keep = match(c("subjid","avg_RT","Cohort","confirmed_initial_dx1"), colnames(data_table2))
+
+#keep = match(c("subjid","avg_RT","Cohort","confirmed_initial_dx1"), colnames(data_table2))
+keep = match(c("subjid","avg_RT","Cohort"), colnames(data_table2))
 percor_plot<-data_table2[,keep]
 
 colnames(percor_plot)[colnames(percor_plot)=="avg_RT"]<-"value"

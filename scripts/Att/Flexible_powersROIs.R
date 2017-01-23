@@ -25,11 +25,11 @@ Flexible.3<-mutate_each(Flexible.2,funs(as.numeric(as.character(.))))
 Flexible.4<-cbind(Flexible.2$File,Flexible.3[,2:265])
 
 #labels<-read.delim(file="/Volumes/Phillips/P5/scripts/Att/power_roi_labels.txt",header=F)
-labels<-read.delim(file="//10.145.64.109/Phillips/P5/scripts/Att/power_roi_labels.txt",header=F)
+labels<-read.delim(file="../txt/power_roi_labels.txt",header=F)
 colnames(Flexible.4)<-labels$V1
 
 #subj<-read.delim(file="/Volumes/Phillips/P5/scripts/SubjInfoGoogleSheet_wdx.txt")
-subj<-read.delim(file="//10.145.64.109/Phillips/P5/scripts/SubjInfoGoogleSheet_wdx.txt")
+subj<-read.delim(file="../SubjInfoGoogleSheet.txt")
 
 
 #Ventral Attention Network
@@ -148,3 +148,86 @@ ggplot(TotalAttention1,aes(x=age,y=DFaverage,group=Cohort,color=Cohort))+geom_po
 ggplot(TotalAttention1,aes(x=age,y=FPaverage,group=Cohort,color=Cohort))+geom_point()+stat_smooth(method="lm")+facet_wrap(~Cohort)
 ggplot(TotalAttention1,aes(x=age,y=COaverage,group=Cohort,color=Cohort))+geom_point()+stat_smooth(method="lm")+facet_wrap(~Cohort)
 ggplot(TotalAttention1,aes(x=age,y=Visaverage,group=Cohort,color=Cohort))+geom_point()+stat_smooth(method="lm")+facet_wrap(~Cohort)
+
+#check for outliers
+meanDA<-mean(TotalAttention1$DAaverage)
+meanVA<-mean(TotalAttention1$VAaverage)
+meanDF<-mean(TotalAttention1$DFaverage)
+meanFP<-mean(TotalAttention1$FPaverage)
+meanCO<-mean(TotalAttention1$COaverage)
+meanVis<-mean(TotalAttention1$Visaverage)
+
+sdDA<-sd(TotalAttention1$DAaverage)
+sdVA<-sd(TotalAttention1$VAaverage)
+sdDF<-sd(TotalAttention1$DFaverage)
+sdFP<-sd(TotalAttention1$FPaverage)
+sdCO<-sd(TotalAttention1$COaverage)
+sdVis<-sd(TotalAttention1$Visaverage)
+
+minDA<-meanDA-2.698*sdDA
+minVA<-meanVA-2.698*sdVA
+minDF<-meanDF-2.698*sdDF
+minFP<-meanFP-2.698*sdFP
+minCO<-meanCO-2.698*sdCO
+minVis<-meanVis-2.698*sdVis
+
+maxDA<-meanDA+2.698*sdDA
+maxVA<-meanVA+2.698*sdVA
+maxDF<-meanDF+2.698*sdDF
+maxFP<-meanFP+2.698*sdFP
+maxCO<-meanCO+2.698*sdCO
+maxVis<-meanVis+2.698*sdVis
+
+for (i in TotalAttention1$DAaverage){
+  if(i<=minDA){
+    print(TotalAttention1$'Popout.1$File'[i])
+  }
+  else if(i>=maxDA){
+    print(TotalAttention1$'Popout.1$File'[i])
+  }
+}
+
+for (i in TotalAttention1$VAaverage){
+  if(i<=minVA){
+    print(TotalAttention1$'Popout.1$File'[i])
+  }
+  else if(i>=maxVA){
+    print(TotalAttention1$'Popout.1$File'[i])
+  }
+}
+
+for (i in TotalAttention1$DFaverage){
+  if(i<=minDF){
+    print(TotalAttention1$'Popout.1$File'[i])
+  }
+  else if(i>=maxDF){
+    print(TotalAttention1$'Popout.1$File'[i])
+  }
+}
+
+for (i in TotalAttention1$FPaverage){
+  if(i<=minFP){
+    print(TotalAttention1$'Popout.1$File'[i])
+  }
+  else if(i>=maxFP){
+    print(TotalAttention1$'Popout.1$File'[i])
+  }
+}
+
+for (i in TotalAttention1$COaverage){
+  if(i<=minCO){
+    print(TotalAttention1$'Popout.1$File'[i])
+  }
+  else if(i>=maxCO){
+    print(TotalAttention1$'Popout.1$File'[i])
+  }
+}
+
+for (i in TotalAttention1$Visaverage){
+  if(i<=minVis){
+    print(TotalAttention1$'Popout.1$File'[i])
+  }
+  else if(i>=maxVis){
+    print(TotalAttention1$'Popout.1$File'[i])
+  }
+}
