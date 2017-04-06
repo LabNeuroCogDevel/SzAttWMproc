@@ -45,9 +45,18 @@ table_correct<-function(filename){
   
   #average RT for correct trial
   avg_RT<-mean(a$RT[ is.finite(a$RT)])
-  avg_RT_pop<-mean(a$RT[ is.finite(a$RT) & a$trltp==1])  
-  avg_RT_hab<-mean(a$RT[ is.finite(a$RT) & a$trltp==2])  
-  avg_RT_flex<-mean(a$RT[ is.finite(a$RT) & a$trltp==3])  
+  sd_RT<-sd(a$RT[ is.finite(a$RT)])
+  rat_RT<-sd_RT/avg_RT
+  avg_RT_pop<-mean(a$RT[ is.finite(a$RT) & a$trltp==1]) 
+  sd_RT_pop<-sd(a$RT[ is.finite(a$RT) & a$trltp==1])
+  rat_RT_pop<-sd_RT_pop/avg_RT_pop
+  avg_RT_hab<-mean(a$RT[ is.finite(a$RT) & a$trltp==2]) 
+  sd_RT_hab<-sd(a$RT[ is.finite(a$RT) & a$trltp==2])
+  rat_RT_hab<-sd_RT_hab/avg_RT_hab
+  avg_RT_flex<-mean(a$RT[ is.finite(a$RT) & a$trltp==3])
+  sd_RT_flex<-sd(a$RT[ is.finite(a$RT) & a$trltp==3])
+  rat_RT_flex<-sd_RT_flex/avg_RT_flex
+  
   #pop
   pop_cor<-sum(a$Crt == 1 & a$trltp  == 1, na.rm=TRUE)
   pop_inc<-sum(a$Crt == 0 & a$trltp  == 1, na.rm=TRUE)
@@ -80,7 +89,8 @@ table_correct<-function(filename){
   
   
   #return(data.frame(subjid, per_cor, per_cor_clin, total_nors, pop_per_cor, pop_per_cor_clin, pop_nors, hab_per_cor, hab_per_cor_clin, hab_nors, flex_per_cor, flex_per_cor_clin, flex_nors))
-  return(data.frame(subjid, per_cor, pop_per_cor,hab_per_cor, flex_per_cor,avg_RT,avg_RT_pop,avg_RT_hab, avg_RT_flex, per_cor_clin, pop_per_cor_clin, hab_per_cor_clin,flex_per_cor_clin))
+  #return(data.frame(subjid, per_cor, pop_per_cor,hab_per_cor, flex_per_cor,avg_RT,avg_RT_pop,avg_RT_hab,avg_RT_flex,per_cor_clin, pop_per_cor_clin, hab_per_cor_clin,flex_per_cor_clin))
+  return(data.frame(subjid, per_cor, pop_per_cor,hab_per_cor, flex_per_cor,avg_RT,sd_RT,avg_RT_pop,sd_RT_pop,avg_RT_hab,sd_RT_hab,avg_RT_flex,sd_RT_flex,per_cor_clin, pop_per_cor_clin, hab_per_cor_clin,flex_per_cor_clin,rat_RT,rat_RT_pop,rat_RT_hab,rat_RT_flex))
   #return(data.frame(subjid,ld1_same_per_cor,ld1_dif_per_cor,ld3_same_per_cor,ld3_dif_per_cor))
 }
 
@@ -94,7 +104,7 @@ setwd("//10.145.64.109/Phillips/P5/group_analyses/Att/behave")
 #20161010-take out subjects that did not complete all of task runs: 11330_20141002, 11364_20150317, 11553_20160620
 #201 take out subjects that did not complete task runs and sub that did not respond to a bunch of stim: 11454_20151019 
 
-bad_subj<-match(c("11330_20141002","11364_20150317","11454_20151019","11553_20160620","11583_20161209"),data_table$subjid)
+bad_subj<-match(c("11330_20141002","11364_20150317","11454_20151019","11553_20160620","11583_20161209","11433_20150924","11602_20170228"),data_table$subjid)
 
 
 data_table1<-data_table[-bad_subj, ]
@@ -117,6 +127,18 @@ table(data_table2$confirmed_initial_dx1)
 control <- data_table2[ which(data_table2$Cohort=='Control'),]
 clinical <- data_table2[ which(data_table2$Cohort=='Clinical'),]
 
+mean(control$age)
+sd(control$age)
+range(control$age)
+
+mean(clinical$age)
+sd(clinical$age)
+range(clinical$age)
+
+sex<-length(which(control$sex == 0))
+sex
+sex/30
+
 pval<- matrix(NA,ncol=1,nrow=9)
 for (i in 2:9)
   
@@ -134,11 +156,11 @@ for (i in 2:9)
 #anova for accuracy w/ condition by cohort
 #10/09/2016- no main effect of group, no group*condition interaction
 #1/13/17: main effect of condition, p=4.13E-5
-Att<-data_table2[ ,c(1,3:5,17)]
-Att2 <- melt(Att, id.vars=c("subjid","Cohort"))
-Att_aov1<-aov(value~Cohort*variable+Error(subjid/variable),data=Att2)
+Att<-data_table2[ ,c(1,3:5,25,28)]
+Att2 <- melt(Att, id.vars=c("subjid","Cohort","age"))
+Att_aov1<-aov(value~Cohort*variable*age+Error(subjid/variable),data=Att2)
 summary(Att_aov1)
-
+t.test(flex_per_cor~Cohort,data=data_table2)
 
 #10/09/2016- no main effect of group, no group*condition interaction
 Att<-data_table2[,c(1,3:5,19)]
@@ -149,37 +171,49 @@ summary(Att_aov1)
 
 #anova for RTw/ condition by cohort
 #1/13/17: no main effects, no interactions
-Att<-data_table2[,c(1,7:9,17)]
-Att2 <- melt(Att, id.vars=c("subjid","Cohort"))
+Att<-data_table2[,c(1,8,10,12,25,28)]
+Att2 <- melt(Att, id.vars=c("subjid","Cohort","age"))
+Att_aov1<-aov(value~Cohort*variable+Error(subjid/variable),data=Att2)
+summary(Att_aov1)
+t.test(avg_RT_flex~Cohort,data=data_table2)
+sd(clinical$avg_RT_flex)
+sd(control$avg_RT_flex)
+
+
+#anova for RT standard deviation by cohort
+Att<-data_table2[ ,c(1,9,11,13,25,28)]
+Att2 <- melt(Att, id.vars=c("subjid","Cohort","age"))
 Att_aov1<-aov(value~Cohort*variable+Error(subjid/variable),data=Att2)
 summary(Att_aov1)
 
-
 #anova for RTw/ condition by diagnosis
 #20161006-
-Att<-data_table2[,c(1,7:9,19)]
-Att2 <- melt(Att, id.vars=c("subjid","confirmed_initial_dx1"))
-Att_aov1<-aov(value~confirmed_initial_dx1*variable+Error(subjid/variable),data=Att2)
+Att<-data_table2[,c(1,7:9,19,28)]
+Att2 <- melt(Att, id.vars=c("subjid","confirmed_initial_dx1","age"))
+Att_aov1<-aov(value~confirmed_initial_dx1*variable+age+Error(subjid/variable),data=Att2)
 summary(Att_aov1)
 
 #age correlations whole group
-for(i in 2:9)
+for(i in 2:12)
 {
   cor <- cor.test(data_table2$age,data_table2[,c(i)])
   print(cor$estimate)
+  #print(cor$p.value)
 }
 
 #age correlations within clinical
-for(i in 2:9)
+for(i in 2:12)
 {
   cor <- cor.test(clinical$age,clinical[,c(i)])
+  #print(cor$estimate)
   print(cor$p.value)
 }
 
 #age correlations within controls
-for(i in 2:9)
+for(i in 2:12)
 {
   cor <- cor.test(control$age,control[,c(i)])
+  #print(cor$estimate)
   print(cor$p.value)
 }
 
@@ -209,10 +243,10 @@ p.grp <-
     width=.25) +
   theme_bw() + 
   # change the legend
-  theme(legend.position="top")+theme_bw(base_size=textSize)+theme(panel.border = element_rect(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))+theme(legend.position="none")+scale_fill_manual(values=c('grey36','white'))+labs(x=(xlab), y=(ylab))+
+  theme(legend.position="top")+theme_bw(base_size=textSize)+theme(panel.border = element_rect(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))+theme(legend.position="none", axis.ticks.x=element_blank(),axis.text.x=element_blank())+scale_fill_manual(values=c('grey36','white'))+labs(x=(xlab), y=(ylab))+
   # remove se bars for empty, draws border everywhere
   aes(color=Cohort) + scale_color_manual(values=c('black','black'))+
-  coord_cartesian(ylim=c(80,100))
+  coord_cartesian(ylim=c(90,100))
 print(p.grp)
 
 dev.off()
@@ -252,11 +286,11 @@ dev.off()
 
 #keep RT
 
-#keep = match(c("subjid","avg_RT","Cohort","confirmed_initial_dx1"), colnames(data_table2))
-keep = match(c("subjid","avg_RT","Cohort"), colnames(data_table2))
+#keep = match(c("subjid","sd_avg_RT","Cohort","confirmed_initial_dx1"), colnames(data_table2))
+keep = match(c("subjid","sd_avg_RT","Cohort"), colnames(data_table2))
 percor_plot<-data_table2[,keep]
 
-colnames(percor_plot)[colnames(percor_plot)=="avg_RT"]<-"value"
+colnames(percor_plot)[colnames(percor_plot)=="sd_avg_RT"]<-"value"
 
 d.grp <- percor_plot %>% 
   group_by(Cohort) %>%  
@@ -278,10 +312,10 @@ p.grp <-
     width=.25) +
   theme_bw() + 
   # change the legend
-  theme(legend.position="top")+theme_bw(base_size=textSize)+theme(panel.border = element_rect(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))+theme(legend.position="none")+scale_fill_manual(values=c('grey36','white'))+labs(x=(xlab), y=(ylab))+
+  theme(legend.position="top")+theme_bw(base_size=textSize)+theme(panel.border = element_rect(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))+theme(legend.position="right",axis.ticks.x=element_blank(),axis.text.x=element_blank())+scale_fill_manual(values=c('grey36','white'))+labs(x=(xlab), y=(ylab))+
   # remove se bars for empty, draws border everywhere
   aes(color=Cohort) + scale_color_manual(values=c('black','black'))+
-  coord_cartesian(ylim=c(400,700))
+  coord_cartesian(ylim=c(100,200))
 print(p.grp)
 
 dev.off()
@@ -380,9 +414,9 @@ dev.off()
 
 
 #RT Flexible group
-keep = match(c("subjid","avg_RT_flex","Cohort","confirmed_initial_dx1"), colnames(data_table2))
+keep = match(c("subjid","sd_RT_flex","Cohort","confirmed_initial_dx1"), colnames(data_table2))
 percor_plot<-data_table2[,keep]
-colnames(percor_plot)[colnames(percor_plot)=="avg_RT_flex"]<-"value"
+colnames(percor_plot)[colnames(percor_plot)=="sd_RT_flex"]<-"value"
 d.grp <- percor_plot %>% 
   group_by(Cohort) %>%  
   meanse 
@@ -402,7 +436,7 @@ p.grp <-
   theme_bw() + 
   theme(legend.position="top")+theme_bw(base_size=textSize)+theme(panel.border = element_rect(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))+theme(legend.position="none")+scale_fill_manual(values=c('grey36','white'))+labs(x=(xlab), y=(ylab))+
   aes(color=Cohort) + scale_color_manual(values=c('black','black'))+
-  coord_cartesian(ylim=c(400,700))
+  coord_cartesian(ylim=c(100,200))
 print(p.grp)
 
 dev.off()
@@ -494,9 +528,9 @@ dev.off()
 
 
 #RT Habitual group
-keep = match(c("subjid","avg_RT_hab","Cohort","confirmed_initial_dx1"), colnames(data_table2))
+keep = match(c("subjid","sd_RT_hab","Cohort","confirmed_initial_dx1"), colnames(data_table2))
 percor_plot<-data_table2[,keep]
-colnames(percor_plot)[colnames(percor_plot)=="avg_RT_hab"]<-"value"
+colnames(percor_plot)[colnames(percor_plot)=="sd_RT_hab"]<-"value"
 d.grp <- percor_plot %>% 
   group_by(Cohort) %>%  
   meanse 
@@ -516,7 +550,7 @@ p.grp <-
   theme_bw() + 
   theme(legend.position="top")+theme_bw(base_size=textSize)+theme(panel.border = element_rect(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))+theme(legend.position="none")+scale_fill_manual(values=c('grey36','white'))+labs(x=(xlab), y=(ylab))+
   aes(color=Cohort) + scale_color_manual(values=c('black','black'))+
-  coord_cartesian(ylim=c(400,700))
+  coord_cartesian(ylim=c(100,200))
 print(p.grp)
 
 dev.off()
@@ -608,9 +642,9 @@ dev.off()
 
 
 #RT Popout group
-keep = match(c("subjid","avg_RT_pop","Cohort","confirmed_initial_dx1"), colnames(data_table2))
+keep = match(c("subjid","sd_RT_pop","Cohort","confirmed_initial_dx1"), colnames(data_table2))
 percor_plot<-data_table2[,keep]
-colnames(percor_plot)[colnames(percor_plot)=="avg_RT_pop"]<-"value"
+colnames(percor_plot)[colnames(percor_plot)=="sd_RT_pop"]<-"value"
 d.grp <- percor_plot %>% 
   group_by(Cohort) %>%  
   meanse 
@@ -630,7 +664,7 @@ p.grp <-
   theme_bw() + 
   theme(legend.position="top")+theme_bw(base_size=textSize)+theme(panel.border = element_rect(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))+theme(legend.position="none")+scale_fill_manual(values=c('grey36','white'))+labs(x=(xlab), y=(ylab))+
   aes(color=Cohort) + scale_color_manual(values=c('black','black'))+
-  coord_cartesian(ylim=c(400,700))
+  coord_cartesian(ylim=c(100,200))
 print(p.grp)
 
 dev.off()
@@ -713,7 +747,7 @@ for (i in colnames(data_table)[cols])
   
   textSize <- 16
   dodge <- position_dodge(width=0.9)
-  means<-(tapply(data_table[,i], subj2$Cohort, mean,na.rm=TRUE))
+  means<-(tapply(data_table2[,i], data_table2$Cohort, mean,na.rm=TRUE))
   means<-(as.vector(means))
   pat<-data_table2[data_table2$Cohort=="Clinical",]
   con<-data_table2[data_table2$Cohort=="Control",]
@@ -728,7 +762,7 @@ for (i in colnames(data_table)[cols])
   range2 <- range(means + 2*sem, means - 2*sem)
   p <- ggplot(data=graph_data, aes(x=group, y=means,alpha=group,fill=group))
   print(p+geom_bar(stat="identity",position=dodge)+
-          geom_errorbar(limits, position=dodge, width=0.25) +
+          geom_errorbar(limits, position=dodge, width=0.25, ymin=d.grp$avg-d.grp$se,ymax=d.grp$avg+d.grp$se) +
           coord_cartesian(ylim=c(.45,.77))+scale_alpha_discrete(range=c(1, 1)) +scale_fill_manual(values=c("light grey","gray34"))+
           xlab(xlab) + ylab(ylab) + theme_bw(base_size=textSize)+theme(legend.position="none"))
   
@@ -880,4 +914,31 @@ dev.off()
 write.table(data_table3, file=paste(todayf,"Att_behave.txt",sep="_"))
 
 
+attach(data_table2)
+require(ggplot2)
+qplot(age,data_table2[,c(2)],
+      xlab="Age", ylab="% correct",
+      main="Age Scatter Plot")
 
+data_table3<-data_table2[,c(1,6,8,10,12,21,24)]
+data_table3$avg_RT<-data_table3$avg_RT*1000
+data_table3$avg_RT_pop<-data_table3$avg_RT_pop*1000
+data_table3$avg_RT_hab<-data_table3$avg_RT_hab*1000
+data_table3$avg_RT_flex<-data_table3$avg_RT_flex*1000
+
+ggplot(data_table2,aes(x=age,y=data_table2[,c(2)],group=Cohort,color=Cohort))+geom_point()+stat_smooth(method="lm")+facet_wrap(~Cohort)+labs(x="Age",y="Reaction Time")
+
+ggplot(data_table3,aes(x=age,y=data_table3[,c(5)],color=Cohort))+geom_point()+stat_smooth(method="lm", se=FALSE)+labs(x="Age",y="RT")+theme_bw()+theme(axis.title=element_text(size=27),legend.position="bottom")+scale_color_grey(start=0.7,end=0,name="")
+
+
+
+
+data_table3<-data_table2[,c(1,7,9,11,13,21,24)]
+data_table3$sd_RT<-data_table3$sd_RT*1000
+data_table3$sd_RT_pop<-data_table3$sd_RT_pop*1000
+data_table3$sd_RT_hab<-data_table3$sd_RT_hab*1000
+data_table3$sd_RT_flex<-data_table3$sd_RT_flex*1000
+
+ggplot(data_table3,aes(x=age,y=data_table2[,c(2)],group=Cohort,color=Cohort))+geom_point()+stat_smooth(method="lm")+facet_wrap(~Cohort)+labs(x="Age",y="Reaction Time")
+
+ggplot(data_table3,aes(x=age,y=data_table3[,c(5)],color=Cohort))+geom_point()+stat_smooth(method="lm", se=FALSE)+labs(x="Age",y="SD RT")+theme_bw()+theme(axis.title=element_text(size=27),legend.position="bottom")+scale_color_grey(start=0.7,end=0,name="")
