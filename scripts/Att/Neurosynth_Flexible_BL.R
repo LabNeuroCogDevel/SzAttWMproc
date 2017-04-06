@@ -37,6 +37,8 @@ data_ROIs<-merge(Flexible.4,subj,by.x="ID",by.y="MRID")
 bad_subj<-match(c("11433_20150924"),data_ROIs$ID)
 data_ROIs<-data_ROIs[-bad_subj, ]
 
+data_ROIs1<-data_ROIs[!duplicated(data_ROIs),]
+data_ROIs<-data_ROIs[!(is.na(data_ROIs$Ins) | data_ROIs$Ins==""), ]
 
 
 #IPL Group
