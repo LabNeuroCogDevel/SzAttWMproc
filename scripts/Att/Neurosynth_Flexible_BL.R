@@ -34,13 +34,6 @@ colnames(Flexible.4)<-c("ID","IPL", "Vis", "FEF", "IFG", "Ins", "TPJ")
 subj<-read.delim(file="C:/Users/Dhruv/Documents/GitHub/SzAttWMproc/scripts/SubjInfoGoogleSheet_att_wdx.txt")
 data_ROIs<-merge(Flexible.4,subj,by.x="ID",by.y="MRID")
 
-bad_subj<-match(c("11433_20150924"),data_ROIs$ID)
-data_ROIs<-data_ROIs[-bad_subj, ]
-
-data_ROIs1<-data_ROIs[!duplicated(data_ROIs),]
-data_ROIs<-data_ROIs[!(is.na(data_ROIs$Ins) | data_ROIs$Ins==""), ]
-
-
 #IPL Group
 keep = match(c("ID","IPL", "Cohort","age"), colnames(data_ROIs))
 IPL_ROIs<-data_ROIs[,keep]
