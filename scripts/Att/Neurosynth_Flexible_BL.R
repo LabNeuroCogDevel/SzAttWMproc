@@ -8,12 +8,12 @@ library(tidyr)
 library(LNCDR)
 
 
-source("C:/Users/Dhruv/Documents/GitHub/SzAttWMproc/scripts/WM/graphing_functions.R")
-#source("/Volumes/Phillips/P5/scripts/WM/graphing_functions.R")
+#source("C:/Users/Dhruv/Documents/GitHub/SzAttWMproc/scripts/WM/graphing_functions.R")
+source("/Volumes/Phillips/P5/scripts/WM/graphing_functions.R")
 
 #Flexible Analysis-Neurosynth ROIs
-#Flexible<-read.delim(file="/Volumes/Phillips/P5/scripts/txt/Flexible_powersROIs_mean.txt",header=T)
-Flexible<-read.delim(file="C:/Users/Dhruv/Documents/GitHub/SzAttWMproc/scripts/Att/ROIs/Flexible_BL_NSROIs_mean.txt",header=T)
+Flexible<-read.delim(file="/Volumes/Phillips/P5/scripts/txt/Flexible_powersROIs_mean.txt",header=T)
+#Flexible<-read.delim(file="C:/Users/Dhruv/Documents/GitHub/SzAttWMproc/scripts/Att/ROIs/Flexible_BL_NSROIs_mean.txt",header=T)
 Flexible.1<<-Flexible[-grep("File",Flexible$File),]
 
 
@@ -31,7 +31,8 @@ Flexible.4<-cbind(Flexible.2$File,Flexible.3[,2:7])
 colnames(Flexible.4)<-c("ID","IPL", "Vis", "FEF", "IFG", "Ins", "TPJ")
 
 
-subj<-read.delim(file="C:/Users/Dhruv/Documents/GitHub/SzAttWMproc/scripts/SubjInfoGoogleSheet_att_wdx.txt")
+#subj<-read.delim(file="C:/Users/Dhruv/Documents/GitHub/SzAttWMproc/scripts/SubjInfoGoogleSheet_att_wdx.txt")
+subj<-read.delim(file="/Volumes/Phillips/P5/scripts/SubjInfoGoogleSheet_att_wdx.txt")
 data_ROIs<-merge(Flexible.4,subj,by.x="ID",by.y="MRID")
 
 #IPL Group

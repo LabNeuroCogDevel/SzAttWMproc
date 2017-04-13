@@ -8,12 +8,12 @@ library(tidyr)
 library(LNCDR)
 
 
-source("C:/Users/Dhruv/Documents/GitHub/SzAttWMproc/scripts/WM/graphing_functions.R")
-#source("/Volumes/Phillips/P5/scripts/WM/graphing_functions.R")
+#source("C:/Users/Dhruv/Documents/GitHub/SzAttWMproc/scripts/WM/graphing_functions.R")
+source("/Volumes/Phillips/P5/scripts/WM/graphing_functions.R")
 
 #Habitual Analysis-Neurosynth ROIs
-#Habitual<-read.delim(file="/Volumes/Phillips/P5/scripts/txt/Habitual_powersROIs_mean.txt",header=T)
-Habitual<-read.delim(file="C:/Users/Dhruv/Documents/GitHub/SzAttWMproc/scripts/Att/ROIs/Habitual_BL_NSROIs_mean.txt",header=T)
+Habitual<-read.delim(file="/Volumes/Phillips/P5/scripts/txt/Habitual_powersROIs_mean.txt",header=T)
+#Habitual<-read.delim(file="C:/Users/Dhruv/Documents/GitHub/SzAttWMproc/scripts/Att/ROIs/Habitual_BL_NSROIs_mean.txt",header=T)
 Habitual.1<<-Habitual[-grep("File",Habitual$File),]
 
 
@@ -28,8 +28,8 @@ Habitual.4<-cbind(Habitual.2$File,Habitual.3[,2:7])
 #labels<-read.delim(file="/Volumes/Phillips/P5/scripts/Att/power_roi_labels.txt",header=F)
 colnames(Habitual.4)<-c("ID","IPL", "Vis", "FEF", "IFG", "Ins", "TPJ")
 
-
-subj<-read.delim(file="C:/Users/Dhruv/Documents/GitHub/SzAttWMproc/scripts/SubjInfoGoogleSheet_att_wdx.txt")
+#subj<-read.delim(file="C:/Users/Dhruv/Documents/GitHub/SzAttWMproc/scripts/SubjInfoGoogleSheet_att_wdx.txt")
+subj<-read.delim(file="/Volumes/Phillips/P5/scripts/SubjInfoGoogleSheet_att_wdx.txt")
 data_ROIs<-merge(Habitual.4,subj,by.x="ID",by.y="MRID")
 
 #IPL Group
