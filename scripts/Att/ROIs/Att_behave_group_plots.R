@@ -130,9 +130,9 @@ mean(clinical$age)
 sd(clinical$age)
 range(clinical$age)
 
-sex<-length(which(clinical$sex == 0))
+sex<-length(which(control$sex == 0))
 sex
-sex/48
+sex/30
 
 #ttest to see if patients & controls are sig different on measures
 #can change coefficient to 2,3 for t-vlaue, 2,4 for p-value
@@ -140,7 +140,7 @@ pval<- matrix(NA,ncol=1,nrow=9)
 for (i in 2:9)
   
 {
-  i=12
+  i=29
   t.test(data_meds[,c(i)]~meds,data=data_meds)
   t.test(data_table2[,c(i)]~Cohort,data=data_table2)
   sd<-sd(clinical[,c(i)])
@@ -156,7 +156,9 @@ Att<-data_table2[ ,c(1,3:5,25,28)]
 Att2 <- melt(Att, id.vars=c("subjid","Cohort","age"))
 Att_aov1<-aov(value~Cohort*variable*age+Error(subjid/variable),data=Att2)
 summary(Att_aov1)
-t.test(per_cor~Cohort,data=data_table2)
+Att2 <- Att2[!(Att2$variable=="pop_per_cor"),]
+t.test(value~variable,data=Att2)
+t.test(pop_per_cor~Cohort,data=data_table2)
 
 #anova for accuracy w/ condition by meds
 Att<-meds[,c(1,3:5,27,28)]
@@ -175,6 +177,8 @@ Att<-data_table2[,c(1,8,10,12,25,28)]
 Att2 <- melt(Att, id.vars=c("subjid","Cohort","age"))
 Att_aov1<-aov(value~Cohort*variable*age+Error(subjid/variable),data=Att2)
 summary(Att_aov1)
+Att2 <- Att2[!(Att2$variable=="avg_RT_flex"),]
+t.test(value~variable,data=Att2)
 t.test(avg_RT_flex~Cohort,data=data_table2)
 
 #anova for RT w/ condition by meds
@@ -194,6 +198,10 @@ Att<-data_table2[ ,c(1,9,11,13,25,28)]
 Att2 <- melt(Att, id.vars=c("subjid","Cohort","age"))
 Att_aov1<-aov(value~Cohort*variable*age+Error(subjid/variable),data=Att2)
 summary(Att_aov1)
+Att2 <- Att2[!(Att2$variable=="sd_RT_pop"),]
+t.test(value~variable,data=Att2)
+t.test(sd_RT_flex~Cohort,data=data_table2)
+
 
 #anova for RT variability w/ condition by meds
 Att<-meds[,c(1,9,11,13,27,28)]
@@ -213,7 +221,7 @@ for(i in 2:12)
 {
   cor <- cor.test(data_table2$age,data_table2[,c(i)])
   print(cor$estimate)
-  print(cor$p.value)
+  #print(cor$p.value)
 }
 
 #age correlations within clinical
@@ -246,7 +254,7 @@ d.grp <- percor_plot %>%
   group_by(Cohort) %>%  
   meanse 
 
-#plot %corr group data
+#plot %corr group data overall
 pdf('/Users/mariaj/Desktop/Per_cor_group.pdf')
 xlab<-" "
 ylab<-"% Correct"
@@ -262,22 +270,45 @@ p.grp <-
   #scale_x_discrete(limits=xorder) +
   theme_bw() + 
   # change the legend
-  theme(legend.position="top")+theme_bw(base_size=textSize)+theme(panel.border = element_rect(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))+theme(legend.position="none", axis.ticks.x=element_blank(),axis.text.x=element_blank())+scale_fill_manual(values=c('grey36','white'))+labs(x="",y=("% correct"))+
+  theme(legend.position="top")+theme_bw(base_size=textSize)+theme(panel.border = element_rect(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))+theme(legend.position="none", axis.ticks.x=element_blank(),axis.text.x=element_blank())+scale_fill_manual(values=c('grey36','white'))+labs(x="",y=(ylab))+
   # remove se bars for empty, draws border everywhere
   aes(color=Cohort) + scale_color_manual(values=c('black','black'))+
-  coord_cartesian(ylim=c(90,100))
+  coord_cartesian(ylim=c(75,100))
 print(p.grp)
 
-#data_table5<-read.table(text="Condition	variable	value	SE
-#Popout	Control	97.64414933	0.723191782
-#                        Habitual	Control	98.951389	0.378454074
-#                        Flexible	Control	96.902504	0.747999983
-#                        Popout	FEP	98.05290104	0.62696399
-#                        Habitual	FEP	98.1339525	0.451416051
-#                        Flexible	FEP	95.45188854	0.877044187
-#                        ", header=TRUE,sep='')
+#calculate se
+sd(clinical$per_cor)/(sqrt(length(clinical$per_cor)))
 
-#xorder = c("Popout","Habitual","Flexible")
+#plot %corr group data by condition
+data_table5<-read.table(text="Condition	variable	value	SE
+Popout	Control	97.64414933	0.723191782
+                        Habitual	Control	98.951389	0.378454074
+                        Flexible	Control	96.902504	0.747999983
+                        Popout	FEP	98.05290104	0.62696399
+                        Habitual	FEP	98.1339525	0.451416051
+                        Flexible	FEP	95.45188854	0.877044187
+                        ", header=TRUE,sep='')
+
+xorder = c("Popout","Habitual","Flexible")
+xlab<-" "
+ylab<-"% Correct"
+textSize=26
+p.grp <- 
+  ggplot(data_table5) + aes(x=Condition,y=value,fill=variable) +
+  geom_bar(stat='identity',width=0.7,position=position_dodge(width=0.7)) +
+  #geom_bar(stat='identity',position="dodge") +
+  geom_errorbar(
+    aes(ymin=data_table5$value-data_table5$SE,ymax=data_table5$value+data_table5$SE),
+    position=position_dodge(0.7),
+    width=.25) +
+  scale_x_discrete(limits=xorder) +
+  theme_bw() + 
+  # change the legend
+  theme(legend.position="top")+theme_bw(base_size=textSize)+theme(panel.border = element_rect(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))+theme(legend.position="none", axis.ticks.x=element_blank(),axis.text.x=element_blank())+scale_fill_manual(values=c('grey36','white'))+labs(x="",y=(ylab))+
+  # remove se bars for empty, draws border everywhere
+  aes(color=variable) + scale_color_manual(values=c('black','black'))+
+  coord_cartesian(ylim=c(90,105))
+print(p.grp)
 
 #keep %corr dx
 keepdx = match(c("subjid","per_cor","confirmed_initial_dx1"), colnames(data_table2))
@@ -345,19 +376,19 @@ p.grp <-
   theme(legend.position="top")+theme_bw(base_size=textSize)+theme(panel.border = element_rect(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))+theme(legend.position="none", axis.ticks.x=element_blank(),axis.text.x=element_blank())+scale_fill_manual(values=c('grey36','white'))+labs(x="",y=(ylab))+
   # remove se bars for empty, draws border everywhere
   aes(color=Cohort) + scale_color_manual(values=c('black','black'))+
-  coord_cartesian(ylim=c(400,700))
+  coord_cartesian(ylim=c(200,700))
 print(p.grp)
 
-#data_tableRT<-read.table(text="Condition	variable	value	SD
-#Popout	Control	559.9818033	27.72351137
-#                         Habitual	Control	557.69221	22.21523181
-#                         Flexible	Control	565.9091367	25.87952809
-#                         Popout	FEP	609.395125	21.70371646
-#                         Habitual	FEP	602.5162292	17.62342873
-#                         Flexible	FEP	621.0141417	21.76021167"
-#                         , header=TRUE,sep='')
+data_tableRT<-read.table(text="Condition	variable	value	SD
+Popout	Control	559.9818033	27.72351137
+                         Habitual	Control	557.69221	22.21523181
+                         Flexible	Control	565.9091367	25.87952809
+                         Popout	FEP	609.395125	21.70371646
+                         Habitual	FEP	602.5162292	17.62342873
+                         Flexible	FEP	621.0141417	21.76021167"
+                         , header=TRUE,sep='')
 
-#
+
 xlab<-" "
 ylab<-"Reaction Time (ms)"
 textSize=26
@@ -375,7 +406,7 @@ ggplot(data_tableRT) + aes(x=Condition,y=value,fill=variable) +
   theme(legend.position="top")+theme_bw(base_size=textSize)+theme(panel.border = element_rect(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))+theme(legend.position="none", axis.ticks.x=element_blank(),axis.text.x=element_blank())+scale_fill_manual(values=c('grey36','white'))+labs(x="",y=(ylab))+
   # remove se bars for empty, draws border everywhere
   aes(color=variable) + scale_color_manual(values=c('black','black'))+
-  coord_cartesian(ylim=c(400,700))
+  coord_cartesian(ylim=c(200,700))
 print(p.grp)
 
 dev.off()
@@ -397,7 +428,7 @@ ylab<-"Reaction Time Variability (ms)"
 textSize=26
 p.grp <- 
   ggplot(d.grp) + aes(x=Cohort,y=avg,fill=Cohort) +
-  geom_bar(stat='identity',position='dodge') +
+  geom_bar(stat='identity',width=0.7,position=position_dodge(width=0.7)) +
   geom_errorbar(
     aes(ymin=d.grp$avg-d.grp$se,ymax=d.grp$avg+d.grp$se),
     position=position_dodge(0.9),
@@ -407,7 +438,7 @@ p.grp <-
   theme(legend.position="top")+theme_bw(base_size=textSize)+theme(panel.border = element_rect(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))+theme(legend.position="none", axis.ticks.x=element_blank(),axis.text.x=element_blank())+scale_fill_manual(values=c('grey36','white'))+labs(x="",y=(ylab))+
   # remove se bars for empty, draws border everywhere
   aes(color=Cohort) + scale_color_manual(values=c('black','black'))+
-  coord_cartesian(ylim=c(100,200))
+  coord_cartesian(ylim=c(50,200))
 print(p.grp)
 
 data_tableRTVar<-read.table(text="Condition	variable	value	SD
@@ -436,7 +467,7 @@ p.grp <-
   theme(legend.position="top")+theme_bw(base_size=textSize)+theme(panel.border = element_rect(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))+theme(legend.position="none", axis.ticks.x=element_blank(),axis.text.x=element_blank())+scale_fill_manual(values=c('grey36','white'))+labs(x="",y=(ylab))+
   # remove se bars for empty, draws border everywhere
   aes(color=variable) + scale_color_manual(values=c('black','black'))+
-  coord_cartesian(ylim=c(100,200))
+  coord_cartesian(ylim=c(50,250))
 print(p.grp)
 
 
