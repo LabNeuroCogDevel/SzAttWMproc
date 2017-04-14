@@ -12,8 +12,8 @@ library(LNCDR)
 source("/Volumes/Phillips/P5/scripts/WM/graphing_functions.R")
 
 #Popout Analysis-Neurosynth ROIs
-Popout<-read.delim(file="/Volumes/Phillips/P5/scripts/txt/Popout_powersROIs_mean.txt",header=T)
-#Popout<-read.delim(file="C:/Users/Dhruv/Documents/GitHub/SzAttWMproc/scripts/Att/ROIs/Popout_BL_NSROIs_mean.txt",header=T)
+Popout<-read.delim(file="/Volumes/Phillips/P5/scripts/Att/Popout_BL_NSROIs_mean.txt",header=T)
+#Popout<-read.delim(file="C:/Users/Dhruv/Documents/GitHub/SzAttWMproc/scripts/Att/Popout_BL_NSROIs_mean.txt",header=T)
 Popout.1<<-Popout[-grep("File",Popout$File),]
 
 
@@ -25,12 +25,9 @@ Popout.2<-Popout.1[ , c(1, which( grepl("Mean",names(Popout.1))  ))]
 Popout.3<-mutate_each(Popout.2,funs(as.numeric(as.character(.))))
 Popout.4<-cbind(Popout.2$File,Popout.3[,2:7])
 
-#labels<-read.delim(file="/Volumes/Phillips/P5/scripts/Att/power_roi_labels.txt",header=F)
-#labels<-read.delim(file="C:/Users/Dhruv/Documents/GitHub/SzAttWMproc/scripts/txt/power_roi_labels.txt",header=F)
 colnames(Popout.4)<-c("ID","IPL", "Vis", "FEF", "IFG", "Ins", "TPJ")
 
-
-#subj<-read.delim(file="C:/Users/Dhruv/Documents/GitHub/SzAttWMproc/scripts/SubjInfoGoogleSheet_att_wdx.txt")
+#subj<-read.delim(file="C:/Users/Dhruv/Documents/GitHub/SzAttWMproc/scripts/Att/SubjInfoGoogleSheet_att_wdx.txt")
 subj<-read.delim(file="/Volumes/Phillips/P5/scripts/SubjInfoGoogleSheet_att_wdx.txt")
 data_ROIs<-merge(Popout.4,subj,by.x="ID",by.y="MRID")
 

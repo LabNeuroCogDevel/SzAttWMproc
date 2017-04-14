@@ -12,10 +12,9 @@ library(LNCDR)
 source("/Volumes/Phillips/P5/scripts/WM/graphing_functions.R")
 
 #Flexible Analysis-Neurosynth ROIs
-Flexible<-read.delim(file="/Volumes/Phillips/P5/scripts/txt/Flexible_powersROIs_mean.txt",header=T)
-#Flexible<-read.delim(file="C:/Users/Dhruv/Documents/GitHub/SzAttWMproc/scripts/Att/ROIs/Flexible_BL_NSROIs_mean.txt",header=T)
+Flexible<-read.delim(file="/Volumes/Phillips/P5/scripts/Att/Flexible_BL_NSROIs_mean.txt",header=T)
+#Flexible<-read.delim(file="C:/Users/Dhruv/Documents/GitHub/SzAttWMproc/scripts/Att/Flexible_BL_NSROIs_mean.txt",header=T)
 Flexible.1<<-Flexible[-grep("File",Flexible$File),]
-
 
 Flexible.1$File<-gsub("/Volumes/Phillips/P5/subj/","",Flexible.1$File)
 Flexible.1$File<-substr(Flexible.1$File,1,14)
@@ -25,13 +24,9 @@ Flexible.2<-Flexible.1[ , c(1, which( grepl("Mean",names(Flexible.1))  ))]
 Flexible.3<-mutate_each(Flexible.2,funs(as.numeric(as.character(.))))
 Flexible.4<-cbind(Flexible.2$File,Flexible.3[,2:7])
 
-#labels<-read.delim(file="/Volumes/Phillips/P5/scripts/Att/power_roi_labels.txt",header=F)
-#labels<-read.delim(file="C:/Users/Dhruv/Documents/GitHub/SzAttWMproc/scripts/txt/power_roi_labels.txt",header=F)
-#colnames(Flexible.4)<-c("ID","LIPL", "RIPL", "LVis", "RVis", "LFEF", "RFEF", "LIFG", "RIFG", "LIns", "RIns", "LTPJ", "RTPJ")
 colnames(Flexible.4)<-c("ID","IPL", "Vis", "FEF", "IFG", "Ins", "TPJ")
 
-
-#subj<-read.delim(file="C:/Users/Dhruv/Documents/GitHub/SzAttWMproc/scripts/SubjInfoGoogleSheet_att_wdx.txt")
+#subj<-read.delim(file="C:/Users/Dhruv/Documents/GitHub/SzAttWMproc/scripts/Att/SubjInfoGoogleSheet_att_wdx.txt")
 subj<-read.delim(file="/Volumes/Phillips/P5/scripts/SubjInfoGoogleSheet_att_wdx.txt")
 data_ROIs<-merge(Flexible.4,subj,by.x="ID",by.y="MRID")
 
