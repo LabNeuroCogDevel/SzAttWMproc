@@ -6,22 +6,18 @@ library(reshape)
 library(dplyr)
 library(tidyr)
 
+#Today's date
 today<-Sys.Date()
 todayf<-format(today,format="%Y%m%d")
-#load all the Attention behav files (they've already been run through matlab)
-#copy them over from skynet
-#Attfiles <- Sys.glob('C:/Users/Dhruv/Documents/GitHub/SzAttWMproc/scripts/csv/Attention*')
+#load all the Attention behav files (they've already been run through matlab) and copy them over from skynet
 Attfiles <- Sys.glob('/Volumes/Phillips/P5/scripts/csv/Attention*')
 
-
-#source("C:/Users/Dhruv/Documents/GitHub/SzAttWMproc/scripts/WM/graphing_functions.R")
+#Load graphing functions
 source("/Volumes/Phillips/P5/scripts/WM/graphing_functions.R")
 
-
-#for just one individual
+#for analyzing a single individual
 #filename = ('/Volumes/Phillips/P5/scripts/csv/Attention_10843')
-#prefix= 'C:/Users/Dhruv/Documents/GitHub/SzAttWMproc/scripts/csv/Attention_'
-#filename = ('//10.145.64.109/Phillips/P5/scripts/csv/Attention_10843')
+
 prefix= '/Volumes/Phillips/P5/scripts/csv/Attention_'
 
 #I'm making a function that I can then apply on all my files later on
@@ -96,18 +92,16 @@ table_correct<-function(filename){
 
 #takes elements of a list(all the att files) and applies a function to each of them
 data_table<-ldply(Attfiles,table_correct)
-#setwd("//10.145.64.109/Phillips/P5/group_analyses/Att/behave")
 setwd("/Volumes/Phillips/P5/group_analyses/Att/behave")
 
 #remove bad subjects
 #take out subjects that did not complete all of task runs: 11330_20141002, 11364_20150317, 11553_20160620
 #take out subjects that did not complete task runs and sub that did not respond to a bunch of stim: 11454_20151019 
-
+#take out subjects who were too old: 11433_20150924
 bad_subj<-match(c("11330_20141002","11364_20150317","11454_20151019","11553_20160620","11583_20161209","11433_20150924","11602_20170228"),data_table$subjid)
 data_table1<-data_table[-bad_subj, ]
 
 #read in google doc
-#subj<-read.delim(file="C:/Users/Dhruv/Documents/GitHub/SzAttWMproc/scripts/Att/SubjInfoGoogleSheet_att_wdx.txt",header=T)
 subj<-read.delim(file="/Volumes/Phillips/P5/scripts/Att/SubjInfoGoogleSheet_att_wdx.txt",header=T)
 
 #match the google doc with existing behave files because not all subs completed the tasks
@@ -116,10 +110,15 @@ table(data_table2$Cohort)
 table(data_table2$confirmed_initial_dx1)
 table(data_table2$meds)
 
-#create control and clinical datasets
+#create control and clinical datasets, Dx and med datasets
 control <- data_table2[ which(data_table2$Cohort=='Control'),]
 clinical <- data_table2[ which(data_table2$Cohort=='Clinical'),]
 data_meds <- data_table2[ which(data_table2$meds < '2'),]
+data_dx <- data_table2[ which(data_table2$confirmed_initial_dx1 < '3'),]
+data_dx1 <- data_table2[ which(data_table2$confirmed_initial_dx1 == '1'),]
+data_dx2 <- data_table2[ which(data_table2$confirmed_initial_dx1 == '2'),]
+data_dx3 <- data_table2[ which(data_table2$confirmed_initial_dx1 == '3'),]
+
 
 #calculate age and statistics for control and clinical groups
 mean(control$age)
@@ -130,6 +129,29 @@ mean(clinical$age)
 sd(clinical$age)
 range(clinical$age)
 
+#calculate mean and se for each diagnostic group
+mean(data_dx1$pop_per_cor)
+mean(data_dx1$hab_per_cor)
+mean(data_dx1$flex_per_cor)
+sd(data_dx1$pop_per_cor)/sqrt(28)
+sd(data_dx1$hab_per_cor)/sqrt(28)
+sd(data_dx1$flex_per_cor)/sqrt(28)
+
+mean(data_dx3$avg_RT_pop)*1000
+mean(data_dx3$avg_RT_hab)*1000
+mean(data_dx3$avg_RT_flex)*1000
+sd(data_dx3$avg_RT_pop)/sqrt(30)*1000
+sd(data_dx3$avg_RT_hab)/sqrt(30)*1000
+sd(data_dx3$avg_RT_flex)/sqrt(30)*1000
+
+mean(data_dx3$sd_RT_pop)*1000
+mean(data_dx3$sd_RT_hab)*1000
+mean(data_dx3$sd_RT_flex)*1000
+sd(data_dx3$sd_RT_pop)/sqrt(30)*1000
+sd(data_dx3$sd_RT_hab)/sqrt(30)*1000
+sd(data_dx3$sd_RT_flex)/sqrt(30)*1000
+
+#
 sex<-length(which(control$sex == 0))
 sex
 sex/30
@@ -154,74 +176,79 @@ for (i in 2:9)
 #anova for accuracy w/ condition by cohort
 Att<-data_table2[ ,c(1,3:5,25,28)]
 Att2 <- melt(Att, id.vars=c("subjid","Cohort","age"))
-Att_aov1<-aov(value~Cohort*variable*age+Error(subjid/variable),data=Att2)
+Att_aov1<-aov(value~Cohort*age*variable+Error(subjid/variable),data=Att2)
 summary(Att_aov1)
-Att2 <- Att2[!(Att2$variable=="pop_per_cor"),]
+Att2 <- Att2[!(Att2$variable=="hab_per_cor"),]
 t.test(value~variable,data=Att2)
 t.test(pop_per_cor~Cohort,data=data_table2)
 
 #anova for accuracy w/ condition by meds
-Att<-meds[,c(1,3:5,27,28)]
+Att<-data_meds[,c(1,3:5,27,28)]
 Att2 <- melt(Att, id.vars=c("subjid","meds","age"))
-Att_aov1<-aov(value~meds*variable*age+Error(subjid/variable),data=Att2)
+Att_aov1<-aov(value~meds*age+Error(subjid),data=Att2)
 summary(Att_aov1)
+Att2 <- Att2[(Att2$variable=="flex_per_cor"),]
 
 #anova for accuracy w/ condition by dx
-Att<-data_table2[,c(1,3:5,26)]
-Att2 <- melt(Att, id.vars=c("subjid","confirmed_initial_dx1"))
-Att_aov1<-aov(value~confirmed_initial_dx1*variable+Error(subjid/variable),data=Att2)
+Att<-data_table2[,c(1,3:5,26,28)]
+Att2 <- melt(Att, id.vars=c("subjid","confirmed_initial_dx1","age"))
+Att_aov1<-aov(value~confirmed_initial_dx1*age+Error(subjid),data=Att2)
 summary(Att_aov1)
+Att2 <- Att2[(Att2$variable=="flex_per_cor"),]
+t.test(flex_per_cor~confirmed_initial_dx1,data=Att2)
 
 #anova for RT w/ condition by cohort
 Att<-data_table2[,c(1,8,10,12,25,28)]
 Att2 <- melt(Att, id.vars=c("subjid","Cohort","age"))
-Att_aov1<-aov(value~Cohort*variable*age+Error(subjid/variable),data=Att2)
+Att_aov1<-aov(value~Cohort*age+Error(subjid),data=Att2)
 summary(Att_aov1)
-Att2 <- Att2[!(Att2$variable=="avg_RT_flex"),]
+Att2 <- Att2[(Att2$variable=="avg_RT_flex"),]
 t.test(value~variable,data=Att2)
 t.test(avg_RT_flex~Cohort,data=data_table2)
 
 #anova for RT w/ condition by meds
-Att<-meds[,c(1,8,10,12,27,28)]
+Att<-data_meds[,c(1,8,10,12,27,28)]
 Att2 <- melt(Att, id.vars=c("subjid","meds","age"))
-Att_aov1<-aov(value~meds*variable*age+Error(subjid/variable),data=Att2)
+Att_aov1<-aov(value~meds*age+Error(subjid),data=Att2)
 summary(Att_aov1)
+Att2 <- Att2[(Att2$variable=="avg_RT_flex"),]
 
 #anova for RT w/ condition by dx
 Att<-data_table2[,c(1,8,10,12,26,28)]
 Att2 <- melt(Att, id.vars=c("subjid","confirmed_initial_dx1","age"))
-Att_aov1<-aov(value~confirmed_initial_dx1*variable+age+Error(subjid/variable),data=Att2)
+Att_aov1<-aov(value~confirmed_initial_dx1*age+Error(subjid),data=Att2)
 summary(Att_aov1)
+Att2 <- Att2[(Att2$variable=="avg_RT_flex"),]
 
 #anova for RT standard deviation by cohort
 Att<-data_table2[ ,c(1,9,11,13,25,28)]
 Att2 <- melt(Att, id.vars=c("subjid","Cohort","age"))
-Att_aov1<-aov(value~Cohort*variable*age+Error(subjid/variable),data=Att2)
+Att_aov1<-aov(value~Cohort*age+Error(subjid),data=Att2)
 summary(Att_aov1)
-Att2 <- Att2[!(Att2$variable=="sd_RT_pop"),]
+Att2 <- Att2[(Att2$variable=="sd_RT_flex"),]
 t.test(value~variable,data=Att2)
 t.test(sd_RT_flex~Cohort,data=data_table2)
 
-
 #anova for RT variability w/ condition by meds
-Att<-meds[,c(1,9,11,13,27,28)]
+Att<-data_meds[,c(1,9,11,13,27,28)]
 Att2 <- melt(Att, id.vars=c("subjid","meds","age"))
-Att_aov1<-aov(value~meds*variable*age+Error(subjid/variable),data=Att2)
+Att_aov1<-aov(value~meds*age+Error(subjid),data=Att2)
 summary(Att_aov1)
+Att2 <- Att2[(Att2$variable=="sd_RT_flex"),]
 
 #anova for RT standard deviation by dx
 Att<-data_table2[ ,c(1,9,11,13,26,28)]
-Att2 <- melt(Att, id.vars=c("subjid","Cohort","age"))
-Att_aov1<-aov(value~Cohort*variable*age+Error(subjid/variable),data=Att2)
+Att2 <- melt(Att, id.vars=c("subjid","confirmed_initial_dx1","age"))
+Att_aov1<-aov(value~confirmed_initial_dx1*age+Error(subjid),data=Att2)
 summary(Att_aov1)
-
+Att2 <- Att2[(Att2$variable=="sd_RT_flex"),]
 
 #age correlations whole group
 for(i in 2:12)
 {
   cor <- cor.test(data_table2$age,data_table2[,c(i)])
   print(cor$estimate)
-  #print(cor$p.value)
+  print(cor$p.value)
 }
 
 #age correlations within clinical
@@ -245,14 +272,16 @@ for(i in 2:12)
 
 #keep %corr group
 #keep = match(c("subjid","per_cor","Cohort","confirmed_initial_dx1"), colnames(data_table2))
-keep = match(c("subjid","per_cor","Cohort"), colnames(data_table2))
+data_table2$confirmed_initial_dx1<- as.factor(data_table2$confirmed_initial_dx1)
+keep = match(c("subjid","per_cor","confirmed_initial_dx1"), colnames(data_table2))
 percor_plot<-data_table2[,keep]
 
 colnames(percor_plot)[colnames(percor_plot)=="per_cor"]<-"value"
 
 d.grp <- percor_plot %>% 
-  group_by(Cohort) %>%  
+  group_by(confirmed_initial_dx1) %>%  
   meanse 
+
 
 #plot %corr group data overall
 pdf('/Users/mariaj/Desktop/Per_cor_group.pdf')
@@ -260,7 +289,7 @@ xlab<-" "
 ylab<-"% Correct"
 textSize=26
 p.grp <- 
-  ggplot(d.grp) + aes(x=Cohort,y=avg,fill=Cohort) +
+  ggplot(d.grp) + aes(x=confirmed_initial_dx1,y=avg,fill=confirmed_initial_dx1) +
   geom_bar(stat='identity',width=0.7,position=position_dodge(width=0.7)) +
   #geom_bar(stat='identity',position="dodge") +
   geom_errorbar(
@@ -270,14 +299,11 @@ p.grp <-
   #scale_x_discrete(limits=xorder) +
   theme_bw() + 
   # change the legend
-  theme(legend.position="top")+theme_bw(base_size=textSize)+theme(panel.border = element_rect(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))+theme(legend.position="none", axis.ticks.x=element_blank(),axis.text.x=element_blank())+scale_fill_manual(values=c('grey36','white'))+labs(x="",y=(ylab))+
+  theme(legend.position="top")+theme_bw(base_size=textSize)+theme(panel.border = element_rect(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))+theme(legend.position="none", axis.ticks.x=element_blank(),axis.text.x=element_blank())+scale_fill_manual(values=c('grey36','grey76','white'))+labs(x="",y=(ylab))+
   # remove se bars for empty, draws border everywhere
-  aes(color=Cohort) + scale_color_manual(values=c('black','black'))+
+  aes(color=confirmed_initial_dx1) + scale_color_manual(values=c('black','black','black'))+
   coord_cartesian(ylim=c(75,100))
 print(p.grp)
-
-#calculate se
-sd(clinical$per_cor)/(sqrt(length(clinical$per_cor)))
 
 #plot %corr group data by condition
 data_table5<-read.table(text="Condition	variable	value	SE
@@ -304,9 +330,9 @@ p.grp <-
   scale_x_discrete(limits=xorder) +
   theme_bw() + 
   # change the legend
-  theme(legend.position="top")+theme_bw(base_size=textSize)+theme(panel.border = element_rect(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))+theme(legend.position="none", axis.ticks.x=element_blank(),axis.text.x=element_blank())+scale_fill_manual(values=c('grey36','white'))+labs(x="",y=(ylab))+
+  theme(legend.position="top")+theme_bw(base_size=textSize)+theme(panel.border = element_rect(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))+theme(legend.position="none", axis.ticks.x=element_blank(),axis.text.x=element_blank())+scale_fill_manual(values=c('grey36','grey76','white'))+labs(x="",y=(ylab))+
   # remove se bars for empty, draws border everywhere
-  aes(color=variable) + scale_color_manual(values=c('black','black'))+
+  aes(color=variable) + scale_color_manual(values=c('black','black','black'))+
   coord_cartesian(ylim=c(90,105))
 print(p.grp)
 
@@ -343,16 +369,51 @@ print(p.grp)
 
 dev.off()
 
+#plot %corr Dx data by condition
+data_table5<-read.table(text="Condition	variable	value	SE
+                        Popout	Control	97.64	0.723
+                        Popout	Schizophrenia-spectrum	98.41	0.579
+                        Popout	'Other psychotic disorder'	97.55	1.28
+                        Habitual	Control	98.95	0.378
+                        Habitual	Schizophrenia-spectrum	98.1	0.650
+                        Habitual	'Other psychotic disorder'	98.18	0.608
+                        Flexible	Control	96.9	0.748
+                        Flexible	Schizophrenia-spectrum	95.99	0.914
+                        Flexible	'Other psychotic disorder'	94.71	1.69
+                        ", header=TRUE,sep='')
+
+xorder = c("Popout","Habitual","Flexible")
+xlab<-" "
+ylab<-"% Correct"
+textSize=26
+p.grp <- 
+  ggplot(data_table5) + aes(x=Condition,y=value,fill=variable) +
+  geom_bar(stat='identity',width=0.7,position=position_dodge(width=0.7)) +
+  #geom_bar(stat='identity',position="dodge") +
+  geom_errorbar(
+    aes(ymin=data_table5$value-data_table5$SE,ymax=data_table5$value+data_table5$SE),
+    position=position_dodge(0.7),
+    width=.25) +
+  scale_x_discrete(limits=xorder) +
+  theme_bw() + 
+  # change the legend
+  theme(legend.position="top")+theme_bw(base_size=textSize)+theme(panel.border = element_rect(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))+theme(legend.position="none", axis.ticks.x=element_blank(),axis.text.x=element_blank())+scale_fill_manual(values=c('grey36','grey76','white'))+labs(x="",y=(ylab))+
+  # remove se bars for empty, draws border everywhere
+  aes(color=variable) + scale_color_manual(values=c('black','black','black'))+
+  coord_cartesian(ylim=c(90,105))
+print(p.grp)
+
 #keep RT
 
 #keep = match(c("subjid","sd_avg_RT","Cohort","confirmed_initial_dx1"), colnames(data_table2))
-keep = match(c("subjid","avg_RT","Cohort"), colnames(data_table2))
+data_table2$confirmed_initial_dx1<- as.factor(data_table2$confirmed_initial_dx1)
+keep = match(c("subjid","avg_RT","confirmed_initial_dx1"), colnames(data_table2))
 percor_plot<-data_table2[,keep]
 
 colnames(percor_plot)[colnames(percor_plot)=="avg_RT"]<-"value"
 
 d.grp <- percor_plot %>% 
-  group_by(Cohort) %>%  
+  group_by(confirmed_initial_dx1) %>%  
   meanse 
 d.grp$avg<-d.grp$avg*1000
 d.grp$se<-d.grp$se*1000
@@ -363,22 +424,23 @@ xlab<-" "
 ylab<-"Reaction Time (ms)"
 textSize=26
 p.grp <- 
-  ggplot(d.grp) + aes(x=Cohort,y=avg,fill=Cohort) +
+  ggplot(d.grp) + aes(x=confirmed_initial_dx1,y=avg,fill=confirmed_initial_dx1) +
   geom_bar(stat='identity',width=0.7,position=position_dodge(width=0.7)) +
   #geom_bar(stat='identity',position="dodge") +
   geom_errorbar(
     aes(ymin=d.grp$avg-d.grp$se,ymax=d.grp$avg+d.grp$se),
     position=position_dodge(0.7),
     width=.25) +
-  #scale_x_discrete(limits=xorder) +
+  scale_x_discrete(limits=xorder) +
   theme_bw() + 
   # change the legend
-  theme(legend.position="top")+theme_bw(base_size=textSize)+theme(panel.border = element_rect(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))+theme(legend.position="none", axis.ticks.x=element_blank(),axis.text.x=element_blank())+scale_fill_manual(values=c('grey36','white'))+labs(x="",y=(ylab))+
+  theme(legend.position="top")+theme_bw(base_size=textSize)+theme(panel.border = element_rect(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))+theme(legend.position="none", axis.ticks.x=element_blank(),axis.text.x=element_blank())+scale_fill_manual(values=c('grey36','grey76','white'))+labs(x="",y=(ylab))+
   # remove se bars for empty, draws border everywhere
-  aes(color=Cohort) + scale_color_manual(values=c('black','black'))+
+  aes(color=confirmed_initial_dx1) + scale_color_manual(values=c('black','black','black'))+
   coord_cartesian(ylim=c(200,700))
 print(p.grp)
 
+#plot RT by group by condition
 data_tableRT<-read.table(text="Condition	variable	value	SD
 Popout	Control	559.9818033	27.72351137
                          Habitual	Control	557.69221	22.21523181
@@ -388,46 +450,83 @@ Popout	Control	559.9818033	27.72351137
                          Flexible	FEP	621.0141417	21.76021167"
                          , header=TRUE,sep='')
 
-
 xlab<-" "
 ylab<-"Reaction Time (ms)"
 textSize=26
 p.grp <- 
-ggplot(data_tableRT) + aes(x=Condition,y=value,fill=variable) +
+ggplot(data_tableRT) + aes(x=Condition,y=value,fill=variable, color=variable) +
   geom_bar(stat='identity',width=0.7,position=position_dodge(width=0.7)) +
   #geom_bar(stat='identity',position="dodge") +
   geom_errorbar(
-    aes(ymin=data_tableRT$value-data_tableRT$SD,ymax=data_tableRT$value+data_tableRT$SD),
+    aes(ymin=data_tableRT$value-data_tableRT$SE,ymax=data_tableRT$value+data_tableRT$SE),
     position=position_dodge(0.7),
     width=.25) +
   scale_x_discrete(limits=xorder) +
   theme_bw() + 
   # change the legend
-  theme(legend.position="top")+theme_bw(base_size=textSize)+theme(panel.border = element_rect(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))+theme(legend.position="none", axis.ticks.x=element_blank(),axis.text.x=element_blank())+scale_fill_manual(values=c('grey36','white'))+labs(x="",y=(ylab))+
+  theme(legend.position="top")+theme_bw(base_size=textSize)+
+  theme(panel.border = element_rect(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))+
+  theme(legend.position="none", axis.ticks.x=element_blank(),axis.text.x=element_blank())+scale_fill_manual(values=c('grey36','grey76','white'))+
+  labs(x="",y=(ylab))+
   # remove se bars for empty, draws border everywhere
-  aes(color=variable) + scale_color_manual(values=c('black','black'))+
+  scale_color_manual(values=c('black','black','black'))+
   coord_cartesian(ylim=c(200,700))
 print(p.grp)
 
-dev.off()
+#plot RT by group by condition
+data_tableRT<-read.table(text="Condition	variable	value	SE
+Popout	Control	559.99	27.72
+                         Popout	Schizophrenia-spectrum	611.4	30.81
+                         Popout	'Other psychotic disorder'	606.6	30.1
+                         Habitual	Control	557.69	22.22
+                         Habitual	Schizophrenia-spectrum	599.2	26.57
+                         Habitual	'Other psychotic disorder'	607.1	20.92
+                         Flexible	Control	656.91	25.87
+                         Flexible	Schizophrenia-spectrum	627.9	30.22
+                         Flexible	'Other psychotic disorder'	611.4	31.41", header=TRUE,sep='')
+
+xlab<-" "
+ylab<-"Reaction Time (ms)"
+textSize=26
+p.grp <- 
+  ggplot(data_tableRT) + aes(x=Condition,y=value,fill=variable, color=variable) +
+  geom_bar(stat='identity',width=0.7,position=position_dodge(width=0.7)) +
+  #geom_bar(stat='identity',position="dodge") +
+  geom_errorbar(
+    aes(ymin=data_tableRT$value-data_tableRT$SE,ymax=data_tableRT$value+data_tableRT$SE),
+    position=position_dodge(0.7),
+    width=.25) +
+  scale_x_discrete(limits=xorder) +
+  theme_bw() + 
+  # change the legend
+  theme(legend.position="top")+theme_bw(base_size=textSize)+
+  theme(panel.border = element_rect(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))+
+  theme(legend.position="none", axis.ticks.x=element_blank(),axis.text.x=element_blank())+scale_fill_manual(values=c('grey36','grey76','white'))+
+  labs(x="",y=(ylab))+
+  # remove se bars for empty, draws border everywhere
+  scale_color_manual(values=c('black','black','black'))+
+  coord_cartesian(ylim=c(200,700))
+print(p.grp)
 
 #keep RT_sd
-keepdx = match(c("subjid","sd_RT","Cohort"), colnames(data_table2))
+data_table2$confirmed_initial_dx1<- as.factor(data_table2$confirmed_initial_dx1)
+keepdx = match(c("subjid","sd_RT","confirmed_initial_dx1"), colnames(data_table2))
 percor_plot<-data_table2[,keepdx]
 
 colnames(percor_plot)[colnames(percor_plot)=="sd_RT"]<-"value"
 
 d.grp <- percor_plot %>% 
-  group_by(Cohort) %>%  
+  group_by(confirmed_initial_dx1) %>%  
   meanse 
 d.grp$avg<-d.grp$avg*1000
 d.grp$se<-d.grp$se*1000
 
+#plot RTV by group
 xlab<-" "
 ylab<-"Reaction Time Variability (ms)"
 textSize=26
 p.grp <- 
-  ggplot(d.grp) + aes(x=Cohort,y=avg,fill=Cohort) +
+  ggplot(d.grp) + aes(x=confirmed_initial_dx1,y=avg,fill=confirmed_initial_dx1) +
   geom_bar(stat='identity',width=0.7,position=position_dodge(width=0.7)) +
   geom_errorbar(
     aes(ymin=d.grp$avg-d.grp$se,ymax=d.grp$avg+d.grp$se),
@@ -435,12 +534,13 @@ p.grp <-
     width=.25) +
   theme_bw() + 
   # change the legend
-  theme(legend.position="top")+theme_bw(base_size=textSize)+theme(panel.border = element_rect(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))+theme(legend.position="none", axis.ticks.x=element_blank(),axis.text.x=element_blank())+scale_fill_manual(values=c('grey36','white'))+labs(x="",y=(ylab))+
+  theme(legend.position="top")+theme_bw(base_size=textSize)+theme(panel.border = element_rect(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))+theme(legend.position="none", axis.ticks.x=element_blank(),axis.text.x=element_blank())+scale_fill_manual(values=c('grey36','grey76','white'))+labs(x="",y=(ylab))+
   # remove se bars for empty, draws border everywhere
-  aes(color=Cohort) + scale_color_manual(values=c('black','black'))+
-  coord_cartesian(ylim=c(50,200))
+  aes(color=confirmed_initial_dx1) + scale_color_manual(values=c('black','black','black'))+
+  coord_cartesian(ylim=c(50,250))
 print(p.grp)
 
+#plot RTV by group by condition
 data_tableRTVar<-read.table(text="Condition	variable	value	SD
 Popout	Control	138.491718	16.75795329
                             Habitual	Control	131.854318	15.56269853
@@ -458,20 +558,20 @@ p.grp <-
   geom_bar(stat='identity',width=0.7,position=position_dodge(width=0.7)) +
   #geom_bar(stat='identity',position="dodge") +
   geom_errorbar(
-    aes(ymin=data_tableRTVar$value-data_tableRTVar$SD,ymax=data_tableRTVar$value+data_tableRTVar$SD),
+    aes(ymin=data_tableRTVar$value-data_tableRTVar$SE,ymax=data_tableRTVar$value+data_tableRTVar$SE),
     position=position_dodge(0.7),
     width=.25) +
   scale_x_discrete(limits=xorder) +
   theme_bw() + 
   # change the legend
-  theme(legend.position="top")+theme_bw(base_size=textSize)+theme(panel.border = element_rect(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))+theme(legend.position="none", axis.ticks.x=element_blank(),axis.text.x=element_blank())+scale_fill_manual(values=c('grey36','white'))+labs(x="",y=(ylab))+
+  theme(legend.position="top")+theme_bw(base_size=textSize)+theme(panel.border = element_rect(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))+theme(legend.position="none", axis.ticks.x=element_blank(),axis.text.x=element_blank())+scale_fill_manual(values=c('grey36','grey76','white'))+labs(x="",y=(ylab))+
   # remove se bars for empty, draws border everywhere
-  aes(color=variable) + scale_color_manual(values=c('black','black'))+
+  aes(color=variable) + scale_color_manual(values=c('black','black','black'))+
   coord_cartesian(ylim=c(50,250))
 print(p.grp)
 
 
-## plot RT_dx data
+## plot RTV by Dx
 pdf('/Users/mariaj/Desktop/Per_cor_dx.pdf')
 xlab<-" "
 ylab<-"Reaction Time Variability (ms)"
@@ -491,7 +591,38 @@ p.grp <-
   coord_cartesian(ylim=c(100,200))
 print(p.grp)
 
+#plot RTV by Dx by condition
+data_tableRTVar<-read.table(text="Condition	variable	value	SE
+Popout	Control	138.5	16.75
+                            Popout	Schizophrenia-spectrum	161.11	17.5
+                            Popout	'Other psychotic disorder'	184.1	21.27
+                            Habitual	Control	131.85	15.56
+                            Habitual	Schizophrenia-spectrum	137.25	16.55
+                            Habitual	'Other psychotic disorder'	148.96	16.53
+                            Flexible	Control	136.4	15.67
+                            Flexible	Schizophrenia-spectrum	176.91	21.98
+                            Flexible	'Other psychotic disorder'	175.04	18.5
+                            ", header=TRUE,sep='')
 
+xlab<-" "
+ylab<-"Reaction Time Variability (ms)"
+textSize=26
+p.grp <- 
+  ggplot(data_tableRTVar) + aes(x=Condition,y=value,fill=variable) +
+  geom_bar(stat='identity',width=0.7,position=position_dodge(width=0.7)) +
+  #geom_bar(stat='identity',position="dodge") +
+  geom_errorbar(
+    aes(ymin=data_tableRTVar$value-data_tableRTVar$SE,ymax=data_tableRTVar$value+data_tableRTVar$SE),
+    position=position_dodge(0.7),
+    width=.25) +
+  scale_x_discrete(limits=xorder) +
+  theme_bw() + 
+  # change the legend
+  theme(legend.position="top")+theme_bw(base_size=textSize)+theme(panel.border = element_rect(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"))+theme(legend.position="none", axis.ticks.x=element_blank(),axis.text.x=element_blank())+scale_fill_manual(values=c('grey36','grey76','white'))+labs(x="",y=(ylab))+
+  # remove se bars for empty, draws border everywhere
+  aes(color=variable) + scale_color_manual(values=c('black','black','black'))+
+  coord_cartesian(ylim=c(50,250))
+print(p.grp)
 
 ##Flexible
 #%corr Flexible group
@@ -850,13 +981,7 @@ p.grp <-
   coord_cartesian(ylim=c(400,700))
 print(p.grp)
 
-
-
-
-
 std <- function(x) sd(x)/sqrt(length(x))
-
-
 
 #this set of graphs focuses on % correct
 pdf(paste(todayf,"Att_behave_percor_noresp.pdf",sep="_"))
@@ -1047,7 +1172,7 @@ sd(controls$AvgOfIQSCORE,na.rm = TRUE)
 t.test(patients$AvgOfIQSCORE,controls$AvgOfIQSCORE)
 patients$AvgOfIQSCORE
 
-#make accruacy RT trade off plots
+#make accuracy RT trade off plots
 Cohort<-subj2$Cohort
 data_table3<-cbind(Cohort,data_table)
 colnames(data_table3)<-c("Cohort","subjid", "overall_correct","popout_correct","habitual_correct","flexible_correct","overall_rt","popout_rt", "habitual_rt","flexible_rt")
@@ -1079,7 +1204,7 @@ qplot(age,data_table2[,c(2)],
       main="Age Scatter Plot")
 
 #plot age by accuracy data by cohort
-ggplot(data_table2,aes(x=age,y=data_table2[,c(2)],group=Cohort,color=Cohort))+geom_point()+stat_smooth(method="lm")+facet_wrap(~Cohort)+labs(x="Age",y="Accuracy")
+ggplot(Att2,aes(x=age,y=Att2[,c(5)],group=variable,color=))+geom_point()+stat_smooth(method="lm")+facet_wrap(~Cohort)+labs(x="Age",y="Accuracy")
 #plot age by accuracy data overall
 ggplot(data_table2,aes(x=age,y=data_table2[,c(2)]))+geom_point()+stat_smooth(method="lm")+labs(x="Age",y="Accuracy")
 
