@@ -1,0 +1,40 @@
+* DWI
+** updates
+2017-05-30 - =01_cpDWI.bash= failed silently
+
+
+** Raw Data
+
+=./00_fetchData.bash=
+   raw data is copied to =subj/= from =/Volumes/Phillips/Raw/MRprojects/P5Sz/= (which is synced to MR)
+   for dwi, only protocol directories with names matching =*diff*= are copied
+
+** to =nii.gz=
+
+=./01_cpDWI.bash=
+   - wraps =./DWI/00_cpDTI_singleSubj.bash=, runs for every subject directory.
+   - looks specificly for =diff113_current_PA_1152x1152*=
+   - runs function in =./DWI/dtidcm2nii.bash=
+   - converts dicom to =nii.gz=, =bvec=, and =bval=.
+   - skips if already run (=subj/dti/dtiAvailToMeg= exists)
+   - copies to reese so meg people can download
+
+
+*** Missing
+
+#+BEGIN_SRC sh
+./01_cpDWI.bash 2>&1|grep WARNING|cut -d' ' -f6 | while read d; do basename $d; done
+#+END_SRC
+
+#+RESULTS:
+| 11277_20160211 |
+| 11330_20141002 |
+| 11341_20141118 |
+| 11357_20150122 |
+| 11364_20150317 |
+| 11367_20150430 |
+| 11553_20160620 |
+| 11593_20170106 |
+| 11604_20170317 |
+| 11607_20170418 |
+
