@@ -1,5 +1,5 @@
 ### INIT
-# should have run read_1d.R -- need variables from that file
+# should have run ts_analysis_ica.R -- need variables from that file
 needvals <- c('mask.file','mask_nii','vx_afni','m')
 stopifnot(all(sapply(needvals,exists)))
 
