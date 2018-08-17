@@ -12,20 +12,27 @@ cd $(dirname $0) # start in script (control) dir
 usage() {
    [ -n "$1" ] && echo "ERROR: $1"
    echo "USAGE:"
-   echo "$0 ROI pathto/nfswudktm_workingmemory_[12]_5.nii.gz"
+   echo "$0 template ROI pathto/nfswudktm_workingmemory_[12]_5.nii.gz"
    echo "run feat model on given working memory preprocess nifti. expect lunaid in name"
    exit
 }
 
 ## check input
+[[ -z "$3" || $1 =~ ^-*help ]] && usage 
+
+# get template
+feattemplate="$1";shift
+[[ ! -r $feattemplate || ! $feattemplate =~ .fsf$ ]] && usage "bad feat template: $feattemplate"
+
 # roi makes sense
-[[ -z "$1" || $1 =~ ^-*help ]] && usage 
 roi="$1";shift
 grep "^$roi$" txt/rois.txt -q || usage "$roi not in txt/rois.txt"
+
 
 # input nifiti makes sense
 in_nii="$1";
 [ -z "$in_nii" -o ! -r "$in_nii" ] && usage "need workingmemory nifti"
+in_nii=$(cd $(dirname $in_nii);pwd)/$(basename $in_nii)
 shift
 
 # check lunaid
@@ -37,14 +44,14 @@ lunaid=${BASH_REMATCH}
 run=${BASH_REMATCH[1]}
 
 # always using delay
-p=delay
 
 # do we have the timeseries file we need
 timeseries=$(pwd)/roi_ts/${lunaid}_${roi}_wm$run.txt
 [ ! -r $timeseries ] && echo "missing $lunaid $run time series: $timeseries!" && exit 1
 
 # what we call the desgin file and the feat output folder
-design_string="L1_WM${run}_${p}_${roi}"
+tmpltstr=$(basename $feattemplate .fsf|sed 's/_\?template//') # delay_L1_template_sepload.fsf -> delay_L1_sepload
+design_string="WM${run}_${roi}_$tmpltstr"
 
 subjdir=$(pwd)/PPI/$lunaid
 
@@ -70,7 +77,7 @@ sed -e "s:SUBJECTID:$lunaid:g" \
     -e "s:OUTPUTDIR:$outputdir:g"\
     -e "s:TIMESERIES:$timeseries:g" \
     -e "s:RUNNUMBER:$run:g" \
-    delay_L1_template_sepload.fsf  > $featfile
+    $feattemplate  > $featfile
 
 echo "$design_string: $outfolder: start $(date +%F) $(date +%s)"
 feat $featfile 

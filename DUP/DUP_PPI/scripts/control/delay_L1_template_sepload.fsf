@@ -1,7 +1,7 @@
 # copy of ../../design/11594_20170111_L1_WM_delay_LVSI_PPI_R2.fsf
-# /Volumes/Phillips/P5/DUP/DUP_PPI/scripts/control
+# /Volumes/Phillips/P5/DUP/DUP_PPI/scripts/control/PPI/
 #  SUBJECTID was 10843_20151015 -- used to find 1d stims: 
-#                         like /Volumes/Phillips/P5/DUP/DUP_PPI/subj/10843_20151015/1d/WM/correct_load_wrongtogether_dlymod/cue_ld1_Correct_run1.stim
+#                         like /Volumes/Phillips/P5/DUP/DUP_PPI/subj/10843_20151015/1d/WM/correct_load_wrongtogether_dlymod/cue_ld1_correct_run1.stim
 #  INPUTFILE was /Volumes/Phillips/P5/DUP/DUP_PPI/subj/10843_20151015/preproc/workingmemory_1/nfswudktm_workingmemory_1_5
 #  OUTPUTDIR was /Volumes/Phillips/P5/DUP/DUP_PPI/subj/10843_20151015/PPI_run1_delay_LDC
 #  TIMESERIES was /Volumes/Phillips/P5/DUP/DUP_PPI/subj/10843_20151015/timeseries/WM/SUBJECTID_LDC_wm1.txt
@@ -312,7 +312,7 @@ set fmri(tempfilt_yn1) 1
 set fmri(deriv_yn1) 1
 
 # Custom EV file (EV 1)
-set fmri(custom1) "PPI//SUBJECTID/1d/sepload_probeRT/cue_ld1_Correct_runRUNNUMBER.stim"
+set fmri(custom1) "/Volumes/Phillips/P5/DUP/DUP_PPI/scripts/control/PPI/SUBJECTID/1d/sepload_probeRT/cue_ld1_correct_runRUNNUMBER.stim"
 
 # Orthogonalise EV 1 wrt EV 0
 set fmri(ortho1.0) 0
@@ -385,7 +385,7 @@ set fmri(tempfilt_yn2) 1
 set fmri(deriv_yn2) 1
 
 # Custom EV file (EV 2)
-set fmri(custom2) "PPI//SUBJECTID/1d/sepload_probeRT/cue_ld3_Correct_runRUNNUMBER.stim"
+set fmri(custom2) "/Volumes/Phillips/P5/DUP/DUP_PPI/scripts/control/PPI/SUBJECTID/1d/sepload_probeRT/cue_ld3_correct_runRUNNUMBER.stim"
 
 # Orthogonalise EV 2 wrt EV 0
 set fmri(ortho2.0) 0
@@ -458,7 +458,7 @@ set fmri(tempfilt_yn3) 1
 set fmri(deriv_yn3) 1
 
 # Custom EV file (EV 3)
-set fmri(custom3) "PPI//SUBJECTID/1d/sepload_probeRT/delay_ld1_Correct_runRUNNUMBER.stim"
+set fmri(custom3) "/Volumes/Phillips/P5/DUP/DUP_PPI/scripts/control/PPI/SUBJECTID/1d/sepload_probeRT/delay_ld1_correct_runRUNNUMBER.stim"
 
 # Orthogonalise EV 3 wrt EV 0
 set fmri(ortho3.0) 0
@@ -531,7 +531,7 @@ set fmri(tempfilt_yn4) 1
 set fmri(deriv_yn4) 1
 
 # Custom EV file (EV 4)
-set fmri(custom4) "PPI//SUBJECTID/1d/sepload_probeRT/delay_ld3_Correct_runRUNNUMBER.stim"
+set fmri(custom4) "/Volumes/Phillips/P5/DUP/DUP_PPI/scripts/control/PPI/SUBJECTID/1d/sepload_probeRT/delay_ld3_correct_runRUNNUMBER.stim"
 
 # Orthogonalise EV 4 wrt EV 0
 set fmri(ortho4.0) 0
@@ -604,7 +604,7 @@ set fmri(tempfilt_yn5) 1
 set fmri(deriv_yn5) 1
 
 # Custom EV file (EV 5)
-set fmri(custom5) "PPI//SUBJECTID/1d/sepload_probeRT/probe_ld1_Correct_runRUNNUMBER.stim"
+set fmri(custom5) "/Volumes/Phillips/P5/DUP/DUP_PPI/scripts/control/PPI/SUBJECTID/1d/sepload_probeRT/probe_ld1_correct_runRUNNUMBER.stim"
 
 # Orthogonalise EV 5 wrt EV 0
 set fmri(ortho5.0) 0
@@ -677,7 +677,7 @@ set fmri(tempfilt_yn6) 1
 set fmri(deriv_yn6) 1
 
 # Custom EV file (EV 6)
-set fmri(custom6) "PPI//SUBJECTID/1d/sepload_probeRT/probe_ld3_Correct_runRUNNUMBER.stim"
+set fmri(custom6) "/Volumes/Phillips/P5/DUP/DUP_PPI/scripts/control/PPI/SUBJECTID/1d/sepload_probeRT/probe_ld3_correct_runRUNNUMBER.stim"
 
 # Orthogonalise EV 6 wrt EV 0
 set fmri(ortho6.0) 0
@@ -750,7 +750,7 @@ set fmri(tempfilt_yn7) 1
 set fmri(deriv_yn7) 1
 
 # Custom EV file (EV 7)
-set fmri(custom7) "PPI//SUBJECTID/1d/sepload_probeRT/cueonly_incorrect_runRUNNUMBER.stim"
+set fmri(custom7) "/Volumes/Phillips/P5/DUP/DUP_PPI/scripts/control/PPI/SUBJECTID/1d/sepload_probeRT/cueonly_incorrect_runRUNNUMBER.stim"
 
 # Orthogonalise EV 7 wrt EV 0
 set fmri(ortho7.0) 0
@@ -823,7 +823,7 @@ set fmri(tempfilt_yn8) 1
 set fmri(deriv_yn8) 1
 
 # Custom EV file (EV 8)
-set fmri(custom8) "PPI//SUBJECTID/1d/sepload_probeRT/dlyonly_incorrect_runRUNNUMBER.stim"
+set fmri(custom8) "/Volumes/Phillips/P5/DUP/DUP_PPI/scripts/control/PPI/SUBJECTID/1d/sepload_probeRT/dlyonly_incorrect_runRUNNUMBER.stim"
 
 # Orthogonalise EV 8 wrt EV 0
 set fmri(ortho8.0) 0
@@ -896,7 +896,7 @@ set fmri(tempfilt_yn9) 1
 set fmri(deriv_yn9) 1
 
 # Custom EV file (EV 9)
-set fmri(custom9) "PPI//SUBJECTID/1d/sepload_probeRT/probe_incorrect_runRUNNUMBER.stim"
+set fmri(custom9) "/Volumes/Phillips/P5/DUP/DUP_PPI/scripts/control/PPI/SUBJECTID/1d/sepload_probeRT/probe_incorrect_runRUNNUMBER.stim"
 
 # Orthogonalise EV 9 wrt EV 0
 set fmri(ortho9.0) 0
