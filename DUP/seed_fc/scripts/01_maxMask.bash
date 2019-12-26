@@ -23,15 +23,15 @@ ADDSUBJS="needMasks.lst"
 # executive and hippocampus mask
 #execHippoMask=BIN_EXEC_HIPPO_converted+tlrc.
 #dlpfcMask=/Volumes/Phillips/P5/DUP/files/Analysis2/DLPFCcombo+tlrc.
-MASKLIST=dlpfcMaskList.lst
+MASKLIST="dlpfcMaskList.lst"
 
 subbriklist=('delay_ld3#0_Coef' 'delay_ld1#0_Coef')
 sbrik_select=$(IFS=,;echo "${subbriklist[*]}")
 
+echo "subj mask brik val" > delay_choice.txt
 cat $MASKLIST | while read mask; do
  #  cat $BACKGROUNDSUBJS | while read subj; do
 #cat $CONTROLS | while read subj; do
-echo "subj mask brik val" > delay_choice.txt
 cat $BACKGROUNDSUBJS| while read subj; do
        backgroundFile=/Volumes/Phillips/P5/subj/${subj}/contrasts/WM/stats_WM_final2+tlrc.HEAD
 
@@ -63,3 +63,6 @@ cat $BACKGROUNDSUBJS| while read subj; do
 done
  done
  echo "done."
+
+echo "subj side x y z" > subj_coord.txt
+perl -lne 'next unless $ARGV=~/(\d{5})_([lr])/; print "$1 $2 $_"' ../backgroundMasks/*txt >> subj_coord.txt
