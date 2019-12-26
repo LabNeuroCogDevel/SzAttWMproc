@@ -95,7 +95,7 @@ datatype(mask_nii) <- 16; bitpix(mask_nii) <- 32
 # save output as ica_concat_ica{1,2}.nii.gz
 LNCDR::to_nii(mask_nii,data_to_nii,'ica_concat_ica1','ica1')
 LNCDR::to_nii(mask_nii,data_to_nii,'ica_concat_ica2','ica2')
-
+# TODO: add more lines for more ICs
 
 ###################
 ### MEANS
